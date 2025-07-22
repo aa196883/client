@@ -2,10 +2,9 @@
   <div class="search-param">
     <!-- choose the collection in which to search -->
     <div class="collections-options">
-      <label for="collections">Collection dans lesquelles rechercher : </label><br />
-      <select id="collections" name="collections">
+      <label for="collections">Collection dans lesquelle rechercher : </label><br />
+      <select id="collections" name="collections" v-model="authors.selectedAuthorName">
         <option
-          @click="authors.selectedAuthorIndex = index"
           v-for="(author, index) in authors.listeAuthors"
           :key="index"
           :value="author"
