@@ -1,6 +1,6 @@
 <template>
   <div class="container-main">
-    <div class="searchbar-box text-center animate__animated animate__fadeInLeft">
+    <div class="searchbar-box text-center">
       <h1 class="searchbar-title">Références</h1>
     </div>
     <div class="container mt-5">

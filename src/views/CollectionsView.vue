@@ -104,4 +104,8 @@ const authorButtonHandler = (author, index) => {
   margin-left: 18rem;
   width: 100%;
 }
+
+#collectionMenu {
+  padding: 1rem;
+}
 </style>

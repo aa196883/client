@@ -91,6 +91,7 @@ const nbPages = computed(() => {
   if (nbPerPage.value === nbScores.value) return 1; // If all items are shown, only one page is needed
   return Math.ceil(nbScores.value / nbPerPage.value); // Calculate the number of pages needed
 });
+const sortedData = ref([]);
 
 function nbPerPageHandler(value) {
   if (value === '*') {
@@ -125,14 +126,12 @@ watch(pageNb, () => {
 
 watch(
   () => props.data,
-  () => {
-    // reset pageNb to 1 when data changes
+  (newData) => {
+    sortedData.value = sortByMatchDegree(newData);
     if (pageNb.value === 1) {
-      //
       LoadPageN();
     } else {
-      pageNb.value = 1; // reset to first page
-      // LoadPageN() not needed because it will be called by the watcher of pageNb
+      pageNb.value = 1;
     }
   },
 );
@@ -142,7 +141,7 @@ function LoadPageN() {
   paginatedScores.value = [];
 
   // slice the data from the page requested
-  const dataSlice = getPageN(props.data, pageNb.value, nbPerPage.value);
+  const dataSlice = getPageN(sortedData.value, pageNb.value, nbPerPage.value);
 
   // check if the data is a collection data or a search result
   const isCollectionData = typeof dataSlice[0] === 'string';
@@ -207,6 +206,15 @@ const closeModal = () => {
   isModalOpen.value = false;
   selectedScore.value = {};
 };
+
+function sortByMatchDegree(scores) {
+  return scores.slice().sort((a, b) => {
+    const degA = a.max_match_degree ?? 0;
+    const degB = b.max_match_degree ?? 0;
+    return degB - degA;
+  });
+}
+
 </script>
 
 <style scoped>

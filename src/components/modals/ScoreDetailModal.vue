@@ -69,11 +69,11 @@
     </div>
     <div class="note-tooltip" ref="tooltipDiv" v-if="isNoteInfoShown">
       <div class="note-info">
-        <p>Résultat numéro: {{ hoveredNote.id }}</p>
-        <p>Satisfaction total de la note: {{ hoveredNote.note_deg }}%</p>
-        <p>Pitch satisfaction: {{ hoveredNote.pitch_deg }}%</p>
-        <p>Duration satisfaction: {{ hoveredNote.duration_deg }}%</p>
-        <p>Sequencing satisfaction: {{ hoveredNote.sequencing_deg }}%</p>
+        <p>Résultat n° {{ hoveredNote.id }}</p>
+        <p>Satisfaction globale de la note : {{ hoveredNote.note_deg }}%</p>
+        <p>Satisfaction en hauteur : {{ hoveredNote.pitch_deg }}%</p>
+        <p>Satisfaction en durée : {{ hoveredNote.duration_deg }}%</p>
+        <p>Satisfaction de l’enchaînement : {{ hoveredNote.sequencing_deg }}%</p>
       </div>
     </div>
   </div>
@@ -204,7 +204,7 @@ async function showNoteInfo(event, match_param, index_param, note) {
   // If still here, finally display the box
   hoveredNote.value = {
     id: index_param + 1, // +1 to match the index in the UI
-    note_deg: Math.floor(match_param.overall_degree * 100),
+    note_deg: Math.floor(note.note_deg * 100),
     pitch_deg: Math.floor(note.pitch_deg * 100),
     duration_deg: Math.floor(note.duration_deg * 100),
     sequencing_deg: Math.floor(note.sequencing_deg * 100),
