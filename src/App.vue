@@ -34,7 +34,7 @@ body {
   margin: 0;
 }
 nav {
-  background-color: #006485;
+  background-color: rgb(0, 100, 150);
 }
 .container-main {
   display: flex;
@@ -43,7 +43,9 @@ nav {
   align-items: center;
 }
 .main-content {
-  display: block;
+  flex: 1; /* occupe tout l’espace restant, pousse le footer en bas */
+  display: flex;
+  flex-direction: column;
 }
 .sticky {
   position: sticky;
