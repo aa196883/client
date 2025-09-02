@@ -14,6 +14,19 @@
       </select>
     </div>
 
+    <div class="modes-options">
+      <label for="modes">Mode :</label><br />
+      <select id="modes" name="modes" v-model="modes.selectedModeIndex">
+        <option
+          v-for="(mode, index) in modes.listeModes"
+          :key="index"
+          :value="index"
+        >
+          {{ mode }}
+        </option>
+      </select>
+    </div>
+
     <hr />
 
     <h4 class="text-center">Sélectionnez le type de recherche</h4>
@@ -162,6 +175,7 @@ import StaveRepresentation from '@/lib/stave.js';
 import { fetchSearchResults } from '@/services/dataBaseQueryServices';
 import { createNotesQueryParam } from '@/services/dataManagerServices';
 import { useAuthorsStore } from '@/stores/authorsStore.ts';
+import { useModesStore } from '@/stores/modesStore.ts';
 import { info_texts } from '@/constants/index.ts';
 
 import { nextTick, onMounted, ref, watch } from 'vue';
@@ -172,6 +186,7 @@ defineOptions({
 const emit = defineEmits(['receiveData', 'showPaginatedResult']);
 const staveRepr = StaveRepresentation.getInstance();
 const authors = useAuthorsStore();
+const modes = useModesStore();
 const advancedOptionShow = ref(false); //flag for display advanced options or not
 const selectedButton = ref(''); // to highlight the selected button ('exact', 'pitch', 'rhythm' or '' when no button is selected)
 const tooltipVisible = ref(false);
@@ -278,6 +293,7 @@ function searchButtonHandler() {
 
   const searchParams = {
     collection: authors.selectedAuthorName,
+    mode: modes.selectedModeName, // null if "Tous les modes"
     notes: notesQueryParam,
     allow_transposition: transposition_cb.value,
     allow_homothety: homothety_cb.value,
