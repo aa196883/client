@@ -1,7 +1,7 @@
 <template>
     <div
       v-if="visible"
-      class="tooltip"
+      class="info-tooltip"
       :style="{ top: `${position.y}px`, left: `${position.x}px` }"
     >
       {{ text }}
@@ -32,7 +32,7 @@
   </script>
   
   <style scoped>
-  .tooltip {
+  .info-tooltip {
     position: fixed; /* important pour sortir du flux parent */
     z-index: 1000;
     background: #f0f0f0;
@@ -43,7 +43,6 @@
     max-width: 300px;
     pointer-events: none; /* ne bloque pas la souris */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    opacity: 1 !important;
   }
   </style>
   
