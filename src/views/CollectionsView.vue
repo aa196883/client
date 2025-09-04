@@ -77,12 +77,12 @@ const authorButtonHandler = (author, index) => {
 
 <style scoped>
 .searchbar-box {
-  background-color: white;
-  color: black;
-  width: 100% !important;
-  justify-content: center;
-  align-items: center;
-  display: flex;
+  background-color: rgb(0, 100, 150);
+  color: white;
+  top: 0;
+  padding: 10px;
+  transition: opacity 1.5s ease-in-out;
+  opacity: 1;
 }
 .selected {
   background-color: #006485;
