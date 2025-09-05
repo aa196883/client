@@ -14,6 +14,19 @@
       </select>
     </div>
 
+    <div class="modes-options">
+      <label for="modes">Mode :</label><br />
+      <select id="modes" name="modes" v-model="modes.selectedModeIndex">
+        <option
+          v-for="(mode, index) in modes.listeModes"
+          :key="index"
+          :value="index"
+        >
+          {{ mode }}
+        </option>
+      </select>
+    </div>
+
     <hr />
 
     <h4 class="text-center">Sélectionnez le type de recherche</h4>
@@ -151,10 +164,8 @@
         </div>
       </div>
     </transition>
-    <div ref="tooltipDiv" v-if="tooltipVisible" class="tooltip-div">
-      <p>{{ tooltipText }}</p>
-    </div>
   </div>
+  <Tooltip ref="tooltip" />
 </template>
 
 <script setup>
@@ -162,7 +173,9 @@ import StaveRepresentation from '@/lib/stave.js';
 import { fetchSearchResults } from '@/services/dataBaseQueryServices';
 import { createNotesQueryParam } from '@/services/dataManagerServices';
 import { useAuthorsStore } from '@/stores/authorsStore.ts';
+import { useModesStore } from '@/stores/modesStore.ts';
 import { info_texts } from '@/constants/index.ts';
+import Tooltip from '@/components/common/Tooltip.vue';
 
 import { nextTick, onMounted, ref, watch } from 'vue';
 
@@ -172,11 +185,11 @@ defineOptions({
 const emit = defineEmits(['receiveData', 'showPaginatedResult']);
 const staveRepr = StaveRepresentation.getInstance();
 const authors = useAuthorsStore();
+const modes = useModesStore();
 const advancedOptionShow = ref(false); //flag for display advanced options or not
 const selectedButton = ref(''); // to highlight the selected button ('exact', 'pitch', 'rhythm' or '' when no button is selected)
-const tooltipVisible = ref(false);
-const tooltipText = ref('');
-const tooltipDiv = ref(null);
+
+const tooltip = ref(null);
 
 //======== Options for search buttons ========//
 // checkbox
@@ -213,42 +226,16 @@ watch(rhythm_cb, (newValue) => {
 const toggleAdvancedOption = async () => {
   // Toggle the visibility of advanced options
   advancedOptionShow.value = !advancedOptionShow.value;
-  // initialise the tooltip listener if advanced options are shown
 
-  await nextTick();
-  
-  if (advancedOptionShow.value) {
-    Object.keys(info_texts).forEach(id => {
-      const elem = document.getElementById(id);
-      if (!elem) {console.warn('Element not found:', id);return;}; // Check if the element exists
-      elem.addEventListener('mousemove', (e) => showTooltip(e, info_texts[id]));
-      elem.addEventListener('mouseout', () => hideTooltip());
-    });
-  } else {
-    // remove the tooltip listener if advanced options are hidden
-    Object.keys(info_texts).forEach(id => {
-      const elem = document.getElementById(id);
-      if (!elem) {console.warn('Element not found:', id);return;}; // Check if the element exists
-      elem.removeEventListener('mousemove', (e) => showTooltip(e, info_texts[id]));
-      elem.removeEventListener('mouseout', () => hideTooltip());
-    });
-  }
+  await nextTick(); 
+
+  Object.entries(info_texts).forEach(([id, txt]) => {
+    attachTooltip(id, txt);
+  });
 };
 
 const toggleSelectedButton = (button) => {
   selectedButton.value = button;
-};
-
-const showTooltip = async (event, text) => {
-  tooltipText.value = text;
-  tooltipVisible.value = true;
-  await nextTick();
-  tooltipDiv.value.style.left = `${event.pageX + 20}px`;
-  tooltipDiv.value.style.top = `${event.pageY - 30}px`; // ??? Apparament le header fait que le tooltip est un peu trop bas ???
-};
-
-const hideTooltip = () => {
-  tooltipVisible.value = false;
 };
 
 function searchButtonHandler() {
@@ -278,6 +265,7 @@ function searchButtonHandler() {
 
   const searchParams = {
     collection: authors.selectedAuthorName,
+    mode: modes.selectedModeName, // null if "Tous les modes"
     notes: notesQueryParam,
     allow_transposition: transposition_cb.value,
     allow_homothety: homothety_cb.value,
@@ -343,6 +331,15 @@ function rhythmToleranteSearchButtonHandler() {
   toggleSelectedButton('rhythm');
 
   searchButtonHandler();
+}
+
+function attachTooltip(id, text) {
+  const elem = document.getElementById(id);
+  if (!elem) return;
+
+  elem.addEventListener("mouseenter", (e) => tooltip.value.show(e, text));
+  elem.addEventListener("mousemove", (e) => tooltip.value.show(e, text));
+  elem.addEventListener("mouseleave", () => tooltip.value.hide());
 }
 
 onMounted(() => {

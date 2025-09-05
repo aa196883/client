@@ -86,7 +86,11 @@ export default {
   text-decoration: underline;
 }
 .searchbar-box {
-  background-color: white;
-  color: black;
+  background-color: rgb(0, 100, 150);
+  color: white;
+  top: 0;
+  padding: 10px;
+  transition: opacity 1.5s ease-in-out;
+  opacity: 1;
 }
 </style>

@@ -34,6 +34,7 @@
             <li><strong>Adel Aly</strong> (poursuite du dev. de l'interface utilisateur et back-end)</li>
             <li><strong>Pierre Alain</strong> (mise en œuvre de l'architecture)</li>
             <li><strong>Vincent Barreaud</strong> (dev. de l'interface utilisateur et back-end)</li>
+            <li><strong>Jules Gobillot</strong> (poursuite du dev. de l'interface utilisateur)</li>
             <li><strong>Anne-Marie Nicol</strong> (amorce projet, références collections et contacts musique traditionnelle)</li>
             <li><strong>Tommaso Padovano</strong> (dev. de l'interface utilisateur et back-end)</li>
             <li><strong>Gwenaël Piel</strong> (encodage des collections J. Mahé)</li>
@@ -94,7 +95,7 @@ ul li {
 }
 
 .searchbar-box {
-  background-color: #006485;
+  background-color: rgb(0, 100, 150);
   color: white;
   top: 0;
   padding: 10px;

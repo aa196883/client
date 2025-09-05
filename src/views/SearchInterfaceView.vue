@@ -54,14 +54,16 @@ function getData(data) {
 <style scoped>
 .search-pattern {
   display: flex;
-  align-items: center;
   flex-direction: column;
+  align-items: center;
   padding: 20px;
   gap: 10px;
   position: relative;
   background-color: #f9f9f9;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin: 0 auto 20px auto; /* centre horizontalement */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: fit-content;   /* 🔑 largeur adaptée au contenu */
+  max-width: 100%;      /* sécurité : jamais plus large que l’écran */
 }
 </style>
