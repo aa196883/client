@@ -7,28 +7,36 @@ export const useModesStore = defineStore('modes', {
       // List of all available modes (first item = "no filter")
       listeModes: <string[]>[
         'Tous les modes',
-        'Ionian',
-        'Dorian',
-        'Phrygian',
-        'Lydian',
-        'Mixolydian',
-        'Aeolian',
-        'Locrian',
+        'Ionien',
+        'Dorien',
+        'Phrygien',
+        'Lydien',
+        'Mixolydien',
+        'Éolien',
+        'Locrien',
       ],
       selectedModeIndex: 0, // Index of the selected mode (default = "Tous les modes")
     };
   },
   getters: {
-    /**
-     * Get the name of the currently selected mode.
-     * Returns an empty string if "Tous les modes" is selected
-     * (so that the backend can ignore the filter).
-     */
     selectedModeName: (state) => {
       if (state.selectedModeIndex === 0) {
         return null; // special case = no filter
       }
-      return state.listeModes[state.selectedModeIndex] || null;
+
+      // table de correspondance FR → EN
+      const modeMap: Record<string, string> = {
+        'Ionien': 'Ionian',
+        'Dorien': 'Dorian',
+        'Phrygien': 'Phrygian',
+        'Lydien': 'Lydian',
+        'Mixolydien': 'Mixolydian',
+        'Éolien': 'Aeolian',
+        'Locrien': 'Locrian',
+      };
+
+      const modeFr = state.listeModes[state.selectedModeIndex];
+      return modeMap[modeFr] || null; // renvoie anglais pour le backend
     },
   },
   actions: {
