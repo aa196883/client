@@ -3,7 +3,12 @@
     <!-- choose the collection in which to search -->
     <div class="collections-options">
       <label for="collections">Collection dans lesquelle rechercher : </label><br />
-      <select id="collections" name="collections" v-model="authors.selectedAuthorName">
+      <select
+        id="collections"
+        name="collections"
+        v-model="authors.selectedAuthorName"
+        :disabled="polyphonicStore.sharedParametersLocked"
+      >
         <option
           v-for="(author, index) in authors.listeAuthors"
           :key="index"
@@ -91,7 +96,12 @@
           </label>
           <br />
           <label id="incipit-lb" class="tooltip-lb">
-            <input id="incipit-cb" type="checkbox" v-model="incipit_cb" />
+            <input
+              id="incipit-cb"
+              type="checkbox"
+              v-model="incipit_cb"
+              :disabled="polyphonicStore.sharedParametersLocked"
+            />
             Chercher uniquement dans les incipits
           </label>
         </div>
@@ -143,7 +153,17 @@
 
           <label class="tooltip-lb" id="alpha-lb">
             Alpha
-            <input type="number" min="0" max="100" value="0" step="5" id="alpha-select" class="nb-select" v-model="alpha" />
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value="0"
+              step="5"
+              id="alpha-select"
+              class="nb-select"
+              v-model="alpha"
+              :disabled="polyphonicStore.sharedParametersLocked"
+            />
             %
             <!-- <span class='tooltiptext'>Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.</span> -->
           </label>
@@ -176,8 +196,9 @@ import { useAuthorsStore } from '@/stores/authorsStore.ts';
 import { useModesStore } from '@/stores/modesStore.ts';
 import { info_texts } from '@/constants/index.ts';
 import Tooltip from '@/components/common/Tooltip.vue';
+import { usePolyphonicSearchStore } from '@/stores/polyphonicSearchStore.ts';
 
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 defineOptions({
   name: 'SearchParam',
@@ -186,6 +207,7 @@ const emit = defineEmits(['receiveData', 'showPaginatedResult']);
 const staveRepr = StaveRepresentation.getInstance();
 const authors = useAuthorsStore();
 const modes = useModesStore();
+const polyphonicStore = usePolyphonicSearchStore();
 const advancedOptionShow = ref(false); //flag for display advanced options or not
 const selectedButton = ref(''); // to highlight the selected button ('exact', 'pitch', 'rhythm' or '' when no button is selected)
 
@@ -193,34 +215,41 @@ const tooltip = ref(null);
 
 //======== Options for search buttons ========//
 // checkbox
-const pitch_cb = ref(true);
-const rhythm_cb = ref(true);
-const transposition_cb = ref(false);
-const homothety_cb = ref(false);
-const incipit_cb = ref(false);
-// number inputs
-const pitch_dist = ref(0);
-const duration_factor = ref(1);
-const duration_gap = ref(0);
-const alpha = ref(0);
-
-watch(pitch_cb, (newValue) => {
-  // Enable or disable options that become irrelevant when unchecked.
-  if (!newValue) {
-    transposition_cb.value = false;
-    // maybe this:
-    // pitch_dist.value = 0; // Reset pitch distance to 0 when pitch is unchecked ??
-  }
+const pitch_cb = computed({
+  get: () => polyphonicStore.pitchEnabled,
+  set: (value) => polyphonicStore.setPitchEnabled(Boolean(value)),
 });
-
-watch(rhythm_cb, (newValue) => {
-  // Enable or disable options that become irrelevant when unchecked.
-  if (!newValue) {
-    homothety_cb.value = false;
-    // maybe this:
-    // duration_factor.value = 1; // Reset duration factor to 1 when rhythm is unchecked ??
-    // duration_gap.value = 0; // Reset duration gap to 0 when rhythm is unchecked ??
-  }
+const rhythm_cb = computed({
+  get: () => polyphonicStore.rhythmEnabled,
+  set: (value) => polyphonicStore.setRhythmEnabled(Boolean(value)),
+});
+const transposition_cb = computed({
+  get: () => polyphonicStore.allowTransposition,
+  set: (value) => polyphonicStore.setAllowTransposition(Boolean(value)),
+});
+const homothety_cb = computed({
+  get: () => polyphonicStore.allowHomothety,
+  set: (value) => polyphonicStore.setAllowHomothety(Boolean(value)),
+});
+const incipit_cb = computed({
+  get: () => polyphonicStore.incipitOnly,
+  set: (value) => polyphonicStore.setIncipitOnly(Boolean(value)),
+});
+const pitch_dist = computed({
+  get: () => polyphonicStore.pitchDistance,
+  set: (value) => polyphonicStore.setPitchDistance(value),
+});
+const duration_factor = computed({
+  get: () => polyphonicStore.durationFactor,
+  set: (value) => polyphonicStore.setDurationFactor(value),
+});
+const duration_gap = computed({
+  get: () => polyphonicStore.durationGap,
+  set: (value) => polyphonicStore.setDurationGap(value),
+});
+const alpha = computed({
+  get: () => polyphonicStore.alpha,
+  set: (value) => polyphonicStore.setAlpha(value),
 });
 
 const toggleAdvancedOption = async () => {
@@ -239,8 +268,10 @@ const toggleSelectedButton = (button) => {
 };
 
 function searchButtonHandler() {
-  // Check that melody is not empty
-  if (staveRepr.melody.length == 0) {
+  const hasFrozenVoices = polyphonicStore.voices.length > 0;
+  const activeMelodyLength = staveRepr.melody.length;
+
+  if (!hasFrozenVoices && activeMelodyLength === 0) {
     alert('Stave is empty !\nPlease enter some notes to search for.');
     return;
   }
@@ -252,8 +283,18 @@ function searchButtonHandler() {
     return;
   }
 
-  if (transposition_cb.value && staveRepr.melody.length == 1) {
+  if (transposition_cb.value && activeMelodyLength === 1) {
     alert('For transposition and contour search, at least two notes are needed (because it is based on interval between notes).');
+    return;
+  }
+
+  const frozenVoices = polyphonicStore.frozenVoicesPayload;
+  const hasInvalidFrozenVoice = frozenVoices.some(
+    (voice) => voice.allowTransposition && voice.noteCount < 2,
+  );
+
+  if (hasInvalidFrozenVoice) {
+    alert('Chaque portée autorisant la transposition doit contenir au moins deux notes.');
     return;
   }
 
@@ -261,21 +302,74 @@ function searchButtonHandler() {
   emit('showPaginatedResult');
 
   // Prepare the search parameters
-  const notesQueryParam = createNotesQueryParam(staveRepr.melody, !pitch_cb.value, !rhythm_cb.value);
+  const activeVoice = activeMelodyLength
+    ? {
+        notes: createNotesQueryParam(staveRepr.melody, !pitch_cb.value, !rhythm_cb.value),
+        pitchDistance: polyphonicStore.pitchDistance,
+        durationFactor: polyphonicStore.durationFactor,
+        durationGap: polyphonicStore.durationGap,
+        allowTransposition: polyphonicStore.allowTransposition,
+        allowHomothety: polyphonicStore.allowHomothety,
+        mode: modes.selectedModeName,
+      }
+    : null;
 
-  const searchParams = {
-    collection: authors.selectedAuthorName,
-    mode: modes.selectedModeName, // null if "Tous les modes"
-    notes: notesQueryParam,
-    allow_transposition: transposition_cb.value,
-    allow_homothety: homothety_cb.value,
-    incipit_only: incipit_cb.value,
-    pitch_distance: pitch_dist.value,
-    duration_factor: duration_factor.value,
-    duration_gap: duration_gap.value,
-    alpha: alpha.value / 100, // convert to a value between 0 and 1
-    contour_match: false,
-  };
+  const voicesPayload = [
+    ...frozenVoices.map((voice) => ({
+      notes: voice.notes,
+      pitchDistance: voice.pitchDistance,
+      durationFactor: voice.durationFactor,
+      durationGap: voice.durationGap,
+      allowTransposition: voice.allowTransposition,
+      allowHomothety: voice.allowHomothety,
+      mode: voice.mode,
+    })),
+  ];
+
+  if (activeVoice) {
+    if (polyphonicStore.voices.length >= polyphonicStore.maxVoices) {
+      alert(`Nombre maximum de portées (${polyphonicStore.maxVoices}) atteint.`);
+      return;
+    }
+    voicesPayload.push(activeVoice);
+  }
+
+  const collection = polyphonicStore.sharedCollection ?? authors.selectedAuthorName;
+  const alphaValue = polyphonicStore.normalizedAlpha;
+  const incipitOnly = polyphonicStore.sharedIncipit;
+
+  let searchParams;
+
+  if (voicesPayload.length === 1) {
+    const voice = voicesPayload[0];
+    searchParams = {
+      collection,
+      mode: voice.mode,
+      notes: voice.notes,
+      allow_transposition: voice.allowTransposition,
+      allow_homothety: voice.allowHomothety,
+      incipit_only: incipitOnly,
+      pitch_distance: voice.pitchDistance,
+      duration_factor: voice.durationFactor,
+      duration_gap: voice.durationGap,
+      alpha: alphaValue,
+      contour_match: false,
+    };
+  } else {
+    searchParams = {
+      collection,
+      mode: voicesPayload.map((voice) => voice.mode ?? ''),
+      notes: voicesPayload.map((voice) => voice.notes),
+      allow_transposition: voicesPayload.map((voice) => voice.allowTransposition),
+      allow_homothety: voicesPayload.map((voice) => voice.allowHomothety),
+      incipit_only: incipitOnly,
+      pitch_distance: voicesPayload.map((voice) => voice.pitchDistance),
+      duration_factor: voicesPayload.map((voice) => voice.durationFactor),
+      duration_gap: voicesPayload.map((voice) => voice.durationGap),
+      alpha: alphaValue,
+      contour_match: false,
+    };
+  }
 
   fetchSearchResults(searchParams).then((results) => {
     emit('receiveData', results);
