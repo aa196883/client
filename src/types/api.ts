@@ -1,4 +1,5 @@
 export type Note = {
+  note?: any;
   note_deg: number;
   pitch_deg: number;
   duration_deg: number;

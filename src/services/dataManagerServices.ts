@@ -39,6 +39,8 @@ function applyColorToNote(
 ): void {
   if (!note.id) return;
 
+  console.log(`Applying color ${color} to note ID ${note.id}`);
+
   const escapedId = escapeCssId(note.id);
   const noteheadElements = root.querySelectorAll<SVGElement>(`#${escapedId} .notehead`);
 
@@ -75,12 +77,18 @@ function extractScoreNotes(score: MatchCarrier): Note[] {
   }
 
   if (Array.isArray(score.voices) && score.voices.length) {
-    return score.voices.flatMap((voice) => voice.notes ?? []);
+    return score.voices.flatMap((voice) =>
+      (voice.notes ?? []).map(({ note, ...rest }) => ({
+        // keep all other properties on the note entry
+        ...rest,
+        // lift note.id to top-level `id`
+        id: note?.id,
+      }))
+    );
   }
 
   return [];
 }
-
 export function colorMatches(score: MatchCarrier = { matches: [] }) {
   // color the matches
   nextTick().then(() => {
@@ -96,6 +104,7 @@ export function colorMatches(score: MatchCarrier = { matches: [] }) {
         notes.forEach((note) => {
           const deg = Math.floor(100 * note.note_deg);
           const col = getColor(deg);
+          console.log(`Match ${match_nb} - Note ID ${note.id} with degree ${deg} gets color ${col}`);
           applyColorToNote(note, col, scoreRoot);
         });
       }
@@ -106,6 +115,7 @@ export function colorMatches(score: MatchCarrier = { matches: [] }) {
     standaloneNotes.forEach((note) => {
       const deg = Math.floor(100 * note.note_deg);
       const col = getColor(deg);
+      console.log(`Standalone note ID ${note.id} with degree ${deg} gets color ${col}`);
       applyColorToNote(note, col, scoreRoot);
     });
   });
