@@ -46,13 +46,18 @@ function applyColorToNote(
 
   if (noteheadElements.length) {
     noteheadElements.forEach((element) => element.setAttribute('fill', color));
+    console.log(1);
     return;
   }
 
   const noteElement = root.querySelector<SVGElement>(`#${escapedId}`);
   if (noteElement) {
     noteElement.setAttribute('fill', color);
+    console.log(2);
+    return;
   }
+
+  console.log(`Note element with ID ${note.id} not found in the score in dataManagerService.`);
 }
 
 function extractNotes(match: Match | undefined): Note[] {
