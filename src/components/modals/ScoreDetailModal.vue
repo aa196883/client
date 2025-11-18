@@ -30,7 +30,7 @@
               </p>
             </div>
           </div>
-          <div v-if="scoreData.matches && scoreData.matches.length > 0" class="results-details">
+          <div v-if="matches.length > 0" class="results-details">
             <!-- Échelle de couleur -->
             <div class="color-scale">
               <h3>Échelle de satisfaction</h3>
@@ -50,7 +50,7 @@
               <button @click="selectAllMatches" class="control-button">Tout sélectionner</button>
               <button @click="deselectAllMatches" class="control-button">Tout désélectionner</button>
               <div class="match-list">
-                <div v-for="(match, index) in scoreData.matches" :key="index" class="match-item">
+                <div v-for="(match, index) in matches" :key="index" class="match-item">
                   <label>
                     <input
                       type="checkbox"
@@ -84,7 +84,7 @@ import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useVerovioStore } from '@/stores/verovioStore';
 import { useAudioPlayer } from '@/composables/useAudioPlayer';
 import { getGradientColor } from '@/services/colorService';
-import type { Match, Note } from '@/types/api';
+import type { Match, Note, PolyphonicVoice } from '@/types/api';
 
 const props = defineProps({
   isOpen: {
@@ -125,7 +125,39 @@ const hoveredNote = ref<HoveredNote>({});
 const isNoteInfoShown = ref(false);
 const tooltipDiv = ref<HTMLElement | null>(null);
 
-const getScoreMatches = (): Match[] => props.scoreData.matches ?? [];
+const normalizeNotes = (notes: Note[] = []): Note[] =>
+  notes
+    .map((note) => {
+      if (note.id) return note;
+      if (note.note?.id) {
+        return {
+          ...note,
+          id: note.note.id,
+        } as Note;
+      }
+      return note;
+    })
+    .filter((note) => Boolean(note.id));
+
+const convertVoicesToMatches = (voices: PolyphonicVoice[] = []): Match[] =>
+  voices.map((voice) => ({
+    overall_degree: voice.voice_degree ?? 0,
+    notes: normalizeNotes(voice.notes ?? []),
+  }));
+
+const getScoreMatches = (): Match[] => {
+  if (Array.isArray(props.scoreData.matches) && props.scoreData.matches.length) {
+    return props.scoreData.matches;
+  }
+
+  if (Array.isArray(props.scoreData.voices) && props.scoreData.voices.length) {
+    return convertVoicesToMatches(props.scoreData.voices);
+  }
+
+  return [];
+};
+
+const matches = computed(() => getScoreMatches());
 
 const getIndexedMatches = () => getScoreMatches().map((match, index) => ({ match, index }));
 
