@@ -6,9 +6,18 @@ export type Note = {
   id: string;
 };
 
+export type PolyphonicVoice = {
+  voice_index: number;
+  start: number;
+  end: number;
+  voice_degree: number;
+  notes: Note[];
+};
+
 export type Match = {
   overall_degree: number;
-  notes: Note[];
+  notes?: Note[];
+  voices?: PolyphonicVoice[];
 };
 
 export type DataResults = {

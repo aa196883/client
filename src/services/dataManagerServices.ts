@@ -17,16 +17,31 @@ export function getPageN(data: any[], pageNb: number, numberPerPage: number) {
   return data.slice((pageNb - 1) * numberPerPage, pageNb * numberPerPage);
 }
 
-export function colorMatches(matches: Match[]) {
+function extractNotes(match: Match | undefined): Note[] {
+  if (!match) return [];
+
+  if (Array.isArray(match.notes) && match.notes.length) {
+    return match.notes;
+  }
+
+  if (Array.isArray(match.voices) && match.voices.length) {
+    return match.voices.flatMap((voice) => voice.notes ?? []);
+  }
+
+  return [];
+}
+
+export function colorMatches(matches: Match[] = []) {
   // color the matches
   nextTick().then(() => {
     for (let match_nb = matches.length - 1; match_nb >= 0; --match_nb) {
       // Reverse order to get the best color in last 'layer'
-      const notes: Note[] = matches[match_nb].notes;
+      const notes: Note[] = extractNotes(matches[match_nb]);
       notes.forEach((note) => {
         const deg = Math.floor(100 * note.note_deg);
         const id = note.id;
         const col = getColor(deg);
+        if (!id) return;
         const notehead = document.getElementById(id);
         if (notehead) {
           notehead.setAttribute('fill', col);

@@ -79,11 +79,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useVerovioStore } from '@/stores/verovioStore';
 import { useAudioPlayer } from '@/composables/useAudioPlayer';
 import { getGradientColor } from '@/services/colorService';
+import type { Match, Note } from '@/types/api';
 
 const props = defineProps({
   isOpen: {
@@ -104,17 +105,43 @@ const emit = defineEmits(['close']);
 
 const verovio = useVerovioStore();
 const scoreSvg = ref('');
-const selectedMatchIndices = ref([]);
+const selectedMatchIndices = ref<{ match: Match; index: number }[]>([]);
 const tempo = ref(120);
-const svgContainer = ref(null);
+const svgContainer = ref<HTMLElement | null>(null);
 const playStatus = computed(() => {
   if (isPlayingAudio.value) return 'Pause';
   if (isPausedAudio.value) return 'Reprendre';
   if (isStoppedAudio.value) return 'Jouer';
 });
-const hoveredNote = ref({});
+type HoveredNote = {
+  id?: number;
+  note_deg?: number;
+  pitch_deg?: number;
+  duration_deg?: number;
+  sequencing_deg?: number;
+};
+
+const hoveredNote = ref<HoveredNote>({});
 const isNoteInfoShown = ref(false);
-const tooltipDiv = ref(null);
+const tooltipDiv = ref<HTMLElement | null>(null);
+
+const getScoreMatches = (): Match[] => props.scoreData.matches ?? [];
+
+const getIndexedMatches = () => getScoreMatches().map((match, index) => ({ match, index }));
+
+const getMatchNotes = (match?: Match): Note[] => {
+  if (!match) return [];
+
+  if (Array.isArray(match.notes) && match.notes.length) {
+    return match.notes;
+  }
+
+  if (Array.isArray(match.voices) && match.voices.length) {
+    return match.voices.flatMap((voice) => voice.notes ?? []);
+  }
+
+  return [];
+};
 
 // Composable pour la gestion audio
 const {
@@ -157,15 +184,18 @@ const renderScore = async () => {
 };
 
 function initNoteHoverInfo() {
-  if (!svgContainer.value) return;
+  const svgElement = svgContainer.value;
+  if (!svgElement) return;
 
-  props.scoreData.matches.forEach((match, index) => {
-    if (match.notes) {
-      match.notes.forEach((note) => {
-        const noteElement = svgContainer.value.querySelector(`#${note.id} .notehead`);
+  const matches = getScoreMatches();
+  matches.forEach((match, index) => {
+    const matchNotes = getMatchNotes(match);
+    if (matchNotes.length) {
+      matchNotes.forEach((note) => {
+        const noteElement = svgElement.querySelector(`#${note.id} .notehead`);
         if (noteElement) {
           noteElement.addEventListener('mouseover', (event) => {
-            showNoteInfo(event, match, index, note);
+            showNoteInfo(event as MouseEvent, match, index, note);
           });
           noteElement.addEventListener('mouseout', () => {
             // Clear hover info
@@ -189,7 +219,7 @@ function initNoteHoverInfo() {
  * @param {Object} note - the note object containing its id and satisfaction degrees;
  * @returns {Promise<void>} - a promise that resolves when the tooltip is displayed.
  */
-async function showNoteInfo(event, match_param, index_param, note) {
+async function showNoteInfo(event: MouseEvent, match_param: Match, index_param: number, note: Note) {
   const sortedSelectedMatches = selectedMatchIndices.value.sort((a, b) => a.index - b.index);
 
   const currentMatchIndex = sortedSelectedMatches.findIndex(({ match, index }) => index === index_param);
@@ -197,10 +227,10 @@ async function showNoteInfo(event, match_param, index_param, note) {
   if (currentMatchIndex === -1) return; // Do not show if match is not selected/visible
 
   for (let k = 0; k < currentMatchIndex; ++k) {
-    if (sortedSelectedMatches[k].match.notes.findIndex((n) => n.id === note.id) !== -1) return;
+    const earlierMatchNotes = getMatchNotes(sortedSelectedMatches[k].match);
+    if (earlierMatchNotes.findIndex((n) => n.id === note.id) !== -1) return;
   }
 
-  console.log('here after for in show note')
   // If still here, finally display the box
   hoveredNote.value = {
     id: index_param + 1, // +1 to match the index in the UI
@@ -211,8 +241,10 @@ async function showNoteInfo(event, match_param, index_param, note) {
   };
   isNoteInfoShown.value = true;
   await nextTick();
-  tooltipDiv.value.style.top = `${event.pageY + 10}px`;
-  tooltipDiv.value.style.left = `${event.pageX + 10}px`;
+  const tooltipElement = tooltipDiv.value;
+  if (!tooltipElement) return;
+  tooltipElement.style.top = `${event.pageY + 10}px`;
+  tooltipElement.style.left = `${event.pageX + 10}px`;
 }
 
 // Rafraîchir le surlignage selon les matches sélectionnés
@@ -222,7 +254,7 @@ const refreshHighlighting = async () => {
   // Effacer tous les surlignages existants
   clearAllHighlighting();
 
-  if (!props.scoreData.matches || selectedMatchIndices.value.length === 0) {
+  if (!getScoreMatches().length || selectedMatchIndices.value.length === 0) {
     return;
   }
 
@@ -231,8 +263,9 @@ const refreshHighlighting = async () => {
 
   // Appliquer le surlignage dans l'ordre (le meilleur score écrasera les autres)
   sortedSelectedMatches.forEach(({ match, index }) => {
-    if (match.notes) {
-      match.notes.forEach((note) => {
+    const matchNotes = getMatchNotes(match);
+    if (matchNotes.length) {
+      matchNotes.forEach((note) => {
         const noteElement = svgContainer.value?.querySelector(`#${note.id} .notehead`);
         if (noteElement) {
           const color = getGradientColor(note.note_deg);
@@ -246,7 +279,7 @@ const refreshHighlighting = async () => {
 // Effacer tous les surlignages
 const clearAllHighlighting = () => {
   if (!svgContainer.value) return;
-  const noteElements = svgContainer.value.querySelectorAll('.notehead');
+  const noteElements = svgContainer.value.querySelectorAll<SVGElement>('.notehead');
   noteElements.forEach((element) => {
     element.setAttribute('fill', 'black');
   });
@@ -254,7 +287,8 @@ const clearAllHighlighting = () => {
 
 // Sélectionner tous les matches
 const selectAllMatches = () => {
-  selectedMatchIndices.value = props.scoreData.matches?.map((match, index) => ({ match, index })) || [];
+  const matches = getScoreMatches();
+  selectedMatchIndices.value = matches.map((match, index) => ({ match, index }));
   refreshHighlighting();
 };
 
@@ -265,7 +299,7 @@ const deselectAllMatches = () => {
 };
 
 // Surligner une note pendant la lecture
-const highlightCurrentPlayingNote = (noteId) => {
+const highlightCurrentPlayingNote = (noteId: string) => {
   // Surligner la note actuelle
   if (!svgContainer.value) return;
   const currentNote = svgContainer.value.querySelector(`#${noteId}`);
@@ -277,7 +311,7 @@ const highlightCurrentPlayingNote = (noteId) => {
 // Effacer le surlignage précédent lors de la lecture
 const removeHighlightPreviousPlayingNote = () => {
   if (!svgContainer.value) return;
-  const highlighted = svgContainer.value.querySelectorAll('.currently-playing');
+  const highlighted = svgContainer.value.querySelectorAll<HTMLElement>('.currently-playing');
   highlighted.forEach((el) => el.classList.remove('currently-playing'));
 };
 
@@ -307,7 +341,7 @@ const closeModal = () => {
   emit('close');
 };
 
-const handleOverlayClick = (event) => {
+const handleOverlayClick = (event: MouseEvent) => {
   if (event.target === event.currentTarget) {
     closeModal();
   }
@@ -318,12 +352,14 @@ watch(
   () => props.isOpen,
   (newVal) => {
     if (newVal) {
-      selectedMatchIndices.value = props.scoreData.matches?.map((match, index) => ({ match, index })) || [];
+      selectedMatchIndices.value = getIndexedMatches();
       renderScore();
-      document.getElementById('app').classList.add('stop-scroll');
+      const appElement = document.getElementById('app');
+      appElement?.classList.add('stop-scroll');
     } else {
       stopPlayback();
-      document.getElementById('app').classList.remove('stop-scroll');
+      const appElement = document.getElementById('app');
+      appElement?.classList.remove('stop-scroll');
     }
   }
 );
