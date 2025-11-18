@@ -22,7 +22,9 @@ export type Match = {
 
 export type DataResults = {
   source: string;
-  number_of_occurrences: number;
-  max_match_degree: number;
-  matches: Match[];
+  number_of_occurrences?: number;
+  max_match_degree?: number;
+  overall_degree?: number;
+  matches?: Match[];
+  voices?: PolyphonicVoice[];
 };

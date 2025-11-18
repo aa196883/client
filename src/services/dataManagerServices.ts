@@ -2,7 +2,7 @@ import { durationNote } from '@/constants/index.ts';
 import { nextTick } from 'vue';
 import { getGradientColor as getColor } from '@/services/colorService.ts';
 
-import type { Match, Note } from '@/types/api.ts';
+import type { Match, Note, PolyphonicVoice } from '@/types/api.ts';
 
 /**
  * Return the sub-array corresponding to the data from page `pageNb`.
@@ -16,6 +16,8 @@ import type { Match, Note } from '@/types/api.ts';
 export function getPageN(data: any[], pageNb: number, numberPerPage: number) {
   return data.slice((pageNb - 1) * numberPerPage, pageNb * numberPerPage);
 }
+
+type MatchCarrier = { matches?: Match[]; voices?: PolyphonicVoice[] } | undefined;
 
 function extractNotes(match: Match | undefined): Note[] {
   if (!match) return [];
@@ -31,23 +33,56 @@ function extractNotes(match: Match | undefined): Note[] {
   return [];
 }
 
-export function colorMatches(matches: Match[] = []) {
+function extractScoreNotes(score: MatchCarrier): Note[] {
+  if (!score) return [];
+
+  if (Array.isArray(score.matches) && score.matches.length) {
+    return score.matches.flatMap((match) => extractNotes(match));
+  }
+
+  if (Array.isArray(score.voices) && score.voices.length) {
+    return score.voices.flatMap((voice) => voice.notes ?? []);
+  }
+
+  return [];
+}
+
+export function colorMatches(score: MatchCarrier = { matches: [] }) {
   // color the matches
   nextTick().then(() => {
-    for (let match_nb = matches.length - 1; match_nb >= 0; --match_nb) {
-      // Reverse order to get the best color in last 'layer'
-      const notes: Note[] = extractNotes(matches[match_nb]);
-      notes.forEach((note) => {
-        const deg = Math.floor(100 * note.note_deg);
-        const id = note.id;
-        const col = getColor(deg);
-        if (!id) return;
-        const notehead = document.getElementById(id);
-        if (notehead) {
-          notehead.setAttribute('fill', col);
-        }
-      });
+    if (!score) return;
+
+    const matches = Array.isArray(score.matches) ? score.matches : [];
+
+    if (matches.length) {
+      for (let match_nb = matches.length - 1; match_nb >= 0; --match_nb) {
+        // Reverse order to get the best color in last 'layer'
+        const notes: Note[] = extractNotes(matches[match_nb]);
+        notes.forEach((note) => {
+          const deg = Math.floor(100 * note.note_deg);
+          const id = note.id;
+          const col = getColor(deg);
+          if (!id) return;
+          const notehead = document.getElementById(id);
+          if (notehead) {
+            notehead.setAttribute('fill', col);
+          }
+        });
+      }
+      return;
     }
+
+    const standaloneNotes = extractScoreNotes(score);
+    standaloneNotes.forEach((note) => {
+      const deg = Math.floor(100 * note.note_deg);
+      const id = note.id;
+      const col = getColor(deg);
+      if (!id) return;
+      const notehead = document.getElementById(id);
+      if (notehead) {
+        notehead.setAttribute('fill', col);
+      }
+    });
   });
 }
 

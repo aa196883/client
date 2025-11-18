@@ -188,7 +188,7 @@ function LoadPageN() {
           paginatedScores.value[index]['svg'] = verovio.tk.renderToSVG(1);
           if (!isCollectionData) {
             // color the matches
-            colorMatches(paginatedScores.value[index].matches);
+            colorMatches(paginatedScores.value[index]);
           }
         }
       });
