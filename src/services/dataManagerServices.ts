@@ -17,7 +17,41 @@ export function getPageN(data: any[], pageNb: number, numberPerPage: number) {
   return data.slice((pageNb - 1) * numberPerPage, pageNb * numberPerPage);
 }
 
-type MatchCarrier = { matches?: Match[]; voices?: PolyphonicVoice[] } | undefined;
+type MatchCarrier = { matches?: Match[]; voices?: PolyphonicVoice[]; source?: string } | undefined;
+
+function getScoreContainer(score: MatchCarrier): HTMLElement | null {
+  if (!score || !score.source) return null;
+  return document.getElementById(score.source);
+}
+
+function escapeCssId(id: string): string {
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+    return CSS.escape(id);
+  }
+  // Basic fallback escaping for special characters
+  return id.replace(/([\0-\x1F\x7F!"#$%&'()*+,./:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
+}
+
+function applyColorToNote(
+  note: Note,
+  color: string,
+  root: HTMLElement | Document,
+): void {
+  if (!note.id) return;
+
+  const escapedId = escapeCssId(note.id);
+  const noteheadElements = root.querySelectorAll<SVGElement>(`#${escapedId} .notehead`);
+
+  if (noteheadElements.length) {
+    noteheadElements.forEach((element) => element.setAttribute('fill', color));
+    return;
+  }
+
+  const noteElement = root.querySelector<SVGElement>(`#${escapedId}`);
+  if (noteElement) {
+    noteElement.setAttribute('fill', color);
+  }
+}
 
 function extractNotes(match: Match | undefined): Note[] {
   if (!match) return [];
@@ -53,6 +87,7 @@ export function colorMatches(score: MatchCarrier = { matches: [] }) {
     if (!score) return;
 
     const matches = Array.isArray(score.matches) ? score.matches : [];
+    const scoreRoot = getScoreContainer(score) ?? document;
 
     if (matches.length) {
       for (let match_nb = matches.length - 1; match_nb >= 0; --match_nb) {
@@ -60,13 +95,8 @@ export function colorMatches(score: MatchCarrier = { matches: [] }) {
         const notes: Note[] = extractNotes(matches[match_nb]);
         notes.forEach((note) => {
           const deg = Math.floor(100 * note.note_deg);
-          const id = note.id;
           const col = getColor(deg);
-          if (!id) return;
-          const notehead = document.getElementById(id);
-          if (notehead) {
-            notehead.setAttribute('fill', col);
-          }
+          applyColorToNote(note, col, scoreRoot);
         });
       }
       return;
@@ -75,13 +105,8 @@ export function colorMatches(score: MatchCarrier = { matches: [] }) {
     const standaloneNotes = extractScoreNotes(score);
     standaloneNotes.forEach((note) => {
       const deg = Math.floor(100 * note.note_deg);
-      const id = note.id;
       const col = getColor(deg);
-      if (!id) return;
-      const notehead = document.getElementById(id);
-      if (notehead) {
-        notehead.setAttribute('fill', col);
-      }
+      applyColorToNote(note, col, scoreRoot);
     });
   });
 }
