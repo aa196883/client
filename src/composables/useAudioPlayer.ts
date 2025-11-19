@@ -45,16 +45,26 @@ export function useAudioPlayer() {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(meiXML, 'text/xml');
 
-    const layers = xmlDoc.querySelectorAll('staff layer');
-    const parsedEvents: PlaybackEvent[] = [];
+    const measures = Array.from(xmlDoc.querySelectorAll('measure'));
+    const groupedEvents = new Map<string, PlaybackEvent>();
+    let measureOffset = 0;
 
-    const processLayerElement = (element: Element, state: { time: number }) => {
+    const processLayerElement = (element: Element, state: { time: number }, localEvents: PlaybackEvent[]) => {
       const tagName = element.tagName?.toLowerCase();
       if (!tagName) return;
 
-      if (tagName === 'rest') {
+      const incrementRest = () => {
         const restDuration = getElementDuration(element);
         state.time += restDuration.seconds;
+      };
+
+      if (tagName === 'rest' || tagName === 'mrest') {
+        incrementRest();
+        return;
+      }
+
+      if (tagName === 'space') {
+        incrementRest();
         return;
       }
 
@@ -62,7 +72,7 @@ export function useAudioPlayer() {
         const duration = getElementDuration(element);
         const note = createPlaybackNote(element, duration.toneDuration);
         if (note) {
-          parsedEvents.push({
+          localEvents.push({
             time: state.time,
             notes: [note],
           });
@@ -78,7 +88,7 @@ export function useAudioPlayer() {
           .filter((note): note is PlaybackNote => Boolean(note));
 
         if (chordNotes.length) {
-          parsedEvents.push({
+          localEvents.push({
             time: state.time,
             notes: chordNotes,
           });
@@ -87,15 +97,35 @@ export function useAudioPlayer() {
         return;
       }
 
-      Array.from(element.children).forEach((child) => processLayerElement(child, state));
+      Array.from(element.children).forEach((child) => processLayerElement(child, state, localEvents));
     };
 
-    layers.forEach((layer) => {
-      const state = { time: 0 };
-      Array.from(layer.children).forEach((child) => processLayerElement(child, state));
+    measures.forEach((measure) => {
+      const layerResults: { events: PlaybackEvent[]; duration: number }[] = [];
+
+      Array.from(measure.querySelectorAll('staff > layer')).forEach((layer) => {
+        const localEvents: PlaybackEvent[] = [];
+        const state = { time: 0 };
+        Array.from(layer.children).forEach((child) => processLayerElement(child, state, localEvents));
+        layerResults.push({ events: localEvents, duration: state.time });
+      });
+
+      layerResults.forEach(({ events }) => {
+        events.forEach((event) => {
+          const absoluteTime = measureOffset + event.time;
+          const key = absoluteTime.toFixed(6);
+          if (!groupedEvents.has(key)) {
+            groupedEvents.set(key, { time: absoluteTime, notes: [] });
+          }
+          groupedEvents.get(key)!.notes.push(...event.notes);
+        });
+      });
+
+      const measureDuration = layerResults.reduce((max, result) => Math.max(max, result.duration), 0);
+      measureOffset += measureDuration;
     });
 
-    return parsedEvents.sort((a, b) => a.time - b.time);
+    return Array.from(groupedEvents.values()).sort((a, b) => a.time - b.time);
   };
 
   /**
