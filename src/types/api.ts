@@ -28,4 +28,8 @@ export type DataResults = {
   overall_degree?: number;
   matches?: Match[];
   voices?: PolyphonicVoice[];
+  title?: string;
+  author?: string;
+  comment?: string;
+  meiXML?: string;
 };
