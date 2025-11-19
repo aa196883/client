@@ -1,8 +1,13 @@
 import { durationNote } from '@/constants/index.ts';
 import { nextTick } from 'vue';
-import { getGradientColor as getColor } from '@/services/colorService.ts';
-
-import type { Match, Note, PolyphonicVoice } from '@/types/api.ts';
+import {
+  applyColorToNote,
+  getAllScoreNotes,
+  getMatchNotes,
+  getNoteColor,
+  getScoreMatches,
+  type MatchCarrier,
+} from '@/services/resultProcessingService';
 
 /**
  * Return the sub-array corresponding to the data from page `pageNb`.
@@ -17,110 +22,33 @@ export function getPageN(data: any[], pageNb: number, numberPerPage: number) {
   return data.slice((pageNb - 1) * numberPerPage, pageNb * numberPerPage);
 }
 
-type MatchCarrier = { matches?: Match[]; voices?: PolyphonicVoice[]; source?: string } | undefined;
-
 function getScoreContainer(score: MatchCarrier): HTMLElement | null {
   if (!score || !score.source) return null;
   return document.getElementById(score.source);
-}
-
-function escapeCssId(id: string): string {
-  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
-    return CSS.escape(id);
-  }
-  // Basic fallback escaping for special characters
-  return id.replace(/([\0-\x1F\x7F!"#$%&'()*+,./:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
-}
-
-function applyColorToNote(
-  note: Note,
-  color: string,
-  root: HTMLElement | Document,
-): void {
-  if (!note.id) return;
-
-  console.log(`Applying color ${color} to note ID ${note.id}`);
-
-  const escapedId = escapeCssId(note.id);
-  const noteheadElements = root.querySelectorAll<SVGElement>(`#${escapedId} .notehead`);
-
-  if (noteheadElements.length) {
-    noteheadElements.forEach((element) => element.setAttribute('fill', color));
-    console.log(1);
-    return;
-  }
-
-  const noteElement = root.querySelector<SVGElement>(`#${escapedId}`);
-  if (noteElement) {
-    noteElement.setAttribute('fill', color);
-    console.log(2);
-    return;
-  }
-
-  console.log(`Note element with ID ${note.id} not found in the score in dataManagerService.`);
-}
-
-function extractNotes(match: Match | undefined): Note[] {
-  if (!match) return [];
-
-  if (Array.isArray(match.notes) && match.notes.length) {
-    return match.notes;
-  }
-
-  if (Array.isArray(match.voices) && match.voices.length) {
-    return match.voices.flatMap((voice) => voice.notes ?? []);
-  }
-
-  return [];
-}
-
-function extractScoreNotes(score: MatchCarrier): Note[] {
-  if (!score) return [];
-
-  if (Array.isArray(score.matches) && score.matches.length) {
-    return score.matches.flatMap((match) => extractNotes(match));
-  }
-
-  if (Array.isArray(score.voices) && score.voices.length) {
-    return score.voices.flatMap((voice) =>
-      (voice.notes ?? []).map(({ note, ...rest }) => ({
-        // keep all other properties on the note entry
-        ...rest,
-        // lift note.id to top-level `id`
-        id: note?.id,
-      }))
-    );
-  }
-
-  return [];
 }
 export function colorMatches(score: MatchCarrier = { matches: [] }) {
   // color the matches
   nextTick().then(() => {
     if (!score) return;
 
-    const matches = Array.isArray(score.matches) ? score.matches : [];
+    const matches = getScoreMatches(score);
     const scoreRoot = getScoreContainer(score) ?? document;
-
+    if (!scoreRoot) return;
     if (matches.length) {
       for (let match_nb = matches.length - 1; match_nb >= 0; --match_nb) {
         // Reverse order to get the best color in last 'layer'
-        const notes: Note[] = extractNotes(matches[match_nb]);
+        const notes = getMatchNotes(matches[match_nb]);
         notes.forEach((note) => {
-          const deg = Math.floor(100 * note.note_deg);
-          const col = getColor(deg);
-          console.log(`Match ${match_nb} - Note ID ${note.id} with degree ${deg} gets color ${col}`);
+          const col = getNoteColor(note);
           applyColorToNote(note, col, scoreRoot);
         });
       }
       return;
     }
 
-    const standaloneNotes = extractScoreNotes(score);
+    const standaloneNotes = getAllScoreNotes(score);
     standaloneNotes.forEach((note) => {
-      const deg = Math.floor(100 * note.note_deg);
-      const col = getColor(deg);
-      console.log(`Standalone note ID ${note.id} with degree ${deg} gets color ${col}`);
+      const col = getNoteColor(note);
       applyColorToNote(note, col, scoreRoot);
     });
   });

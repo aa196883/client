@@ -80,11 +80,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { ref, watch, onMounted, onUnmounted, nextTick, computed, type PropType } from 'vue';
 import { useVerovioStore } from '@/stores/verovioStore';
 import { useAudioPlayer } from '@/composables/useAudioPlayer';
-import { getGradientColor } from '@/services/colorService';
-import type { Match, Note, PolyphonicVoice } from '@/types/api';
+import {
+  getScoreMatches as extractScoreMatches,
+  getMatchNotes,
+  applyColorToNote,
+  getNoteColor,
+} from '@/services/resultProcessingService';
+import type { Match, Note } from '@/types/api';
+import type { DataResults } from '@/types/api';
 
 const props = defineProps({
   isOpen: {
@@ -92,7 +98,7 @@ const props = defineProps({
     default: false,
   },
   scoreData: {
-    type: Object,
+    type: Object as PropType<DataResults>,
     required: true,
   },
   authorName: {
@@ -125,55 +131,9 @@ const hoveredNote = ref<HoveredNote>({});
 const isNoteInfoShown = ref(false);
 const tooltipDiv = ref<HTMLElement | null>(null);
 
-const normalizeNotes = (notes: Note[] = []): Note[] =>
-  notes
-    .map((note) => {
-      if (note.id) return note;
-      if (note.note?.id) {
-        return {
-          ...note,
-          id: note.note.id,
-        } as Note;
-      }
-      return note;
-    })
-    .filter((note) => Boolean(note.id));
+const matches = computed(() => extractScoreMatches(props.scoreData));
 
-const convertVoicesToMatches = (voices: PolyphonicVoice[] = []): Match[] =>
-  voices.map((voice) => ({
-    overall_degree: voice.voice_degree ?? 0,
-    notes: normalizeNotes(voice.notes ?? []),
-  }));
-
-const getScoreMatches = (): Match[] => {
-  if (Array.isArray(props.scoreData.matches) && props.scoreData.matches.length) {
-    return props.scoreData.matches;
-  }
-
-  if (Array.isArray(props.scoreData.voices) && props.scoreData.voices.length) {
-    return convertVoicesToMatches(props.scoreData.voices);
-  }
-
-  return [];
-};
-
-const matches = computed(() => getScoreMatches());
-
-const getIndexedMatches = () => getScoreMatches().map((match, index) => ({ match, index }));
-
-const getMatchNotes = (match?: Match): Note[] => {
-  if (!match) return [];
-
-  if (Array.isArray(match.notes) && match.notes.length) {
-    return match.notes;
-  }
-
-  if (Array.isArray(match.voices) && match.voices.length) {
-    return match.voices.flatMap((voice) => voice.notes ?? []);
-  }
-
-  return [];
-};
+const getIndexedMatches = () => matches.value.map((match, index) => ({ match, index }));
 
 // Composable pour la gestion audio
 const {
@@ -190,6 +150,7 @@ const {
 
 // Charger la partition complète
 const renderScore = async () => {
+  if (!props.scoreData.meiXML) return;
   // Rendre la partition avec Verovio
   await verovio.ensureTkInitialized();
 
@@ -219,8 +180,7 @@ function initNoteHoverInfo() {
   const svgElement = svgContainer.value;
   if (!svgElement) return;
 
-  const matches = getScoreMatches();
-  matches.forEach((match, index) => {
+  matches.value.forEach((match, index) => {
     const matchNotes = getMatchNotes(match);
     if (matchNotes.length) {
       matchNotes.forEach((note) => {
@@ -286,7 +246,7 @@ const refreshHighlighting = async () => {
   // Effacer tous les surlignages existants
   clearAllHighlighting();
 
-  if (!getScoreMatches().length || selectedMatchIndices.value.length === 0) {
+  if (!matches.value.length || selectedMatchIndices.value.length === 0) {
     return;
   }
 
@@ -298,11 +258,8 @@ const refreshHighlighting = async () => {
     const matchNotes = getMatchNotes(match);
     if (matchNotes.length) {
       matchNotes.forEach((note) => {
-        const noteElement = svgContainer.value?.querySelector(`#${note.id} .notehead`);
-        if (noteElement) {
-          const color = getGradientColor(note.note_deg);
-          noteElement.setAttribute('fill', color);
-        }
+        const color = getNoteColor(note);
+        applyColorToNote(note, color, svgContainer.value);
       });
     }
   });
@@ -319,8 +276,7 @@ const clearAllHighlighting = () => {
 
 // Sélectionner tous les matches
 const selectAllMatches = () => {
-  const matches = getScoreMatches();
-  selectedMatchIndices.value = matches.map((match, index) => ({ match, index }));
+  selectedMatchIndices.value = matches.value.map((match, index) => ({ match, index }));
   refreshHighlighting();
 };
 
@@ -353,7 +309,7 @@ const togglePlayback = async () => {
     pauseScore();
   } else if (isPausedAudio.value) {
     resumeScore();
-  } else {
+  } else if (props.scoreData.meiXML) {
     await playScore(props.scoreData.meiXML, tempo.value);
   }
 };
