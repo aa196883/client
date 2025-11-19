@@ -287,13 +287,14 @@ const deselectAllMatches = () => {
 };
 
 // Surligner une note pendant la lecture
-const highlightCurrentPlayingNote = (noteId: string) => {
-  // Surligner la note actuelle
+const highlightCurrentPlayingNotes = (noteIds: string[]) => {
   if (!svgContainer.value) return;
-  const currentNote = svgContainer.value.querySelector(`#${noteId}`);
-  if (currentNote) {
-    currentNote.classList.add('currently-playing');
-  }
+  noteIds.forEach((noteId) => {
+    const currentNote = svgContainer.value?.querySelector(`#${noteId}`);
+    if (currentNote) {
+      currentNote.classList.add('currently-playing');
+    }
+  });
 };
 
 // Effacer le surlignage précédent lors de la lecture
@@ -349,12 +350,12 @@ watch(
       const appElement = document.getElementById('app');
       appElement?.classList.remove('stop-scroll');
     }
-  }
+  },
 );
 
 // Configuration du callback pour le surlignage pendant la lecture
 onMounted(() => {
-  setHighlightCallbacks(highlightCurrentPlayingNote, removeHighlightPreviousPlayingNote);
+  setHighlightCallbacks(highlightCurrentPlayingNotes, removeHighlightPreviousPlayingNote);
 });
 
 onUnmounted(() => {
