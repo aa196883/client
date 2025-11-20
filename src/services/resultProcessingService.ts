@@ -1,5 +1,5 @@
 import { getGradientColor } from '@/services/colorService';
-import type { Match, Note, PolyphonicVoice } from '@/types/api';
+import type { DataResults, Match, Note, PolyphonicVoice } from '@/types/api';
 
 export type MatchCarrier = {
   matches?: Match[];
@@ -61,6 +61,60 @@ export const getScoreMatches = (score?: MatchCarrier): Match[] => {
 
 export const getAllScoreNotes = (score?: MatchCarrier): Note[] =>
   getScoreMatches(score).flatMap((match) => getMatchNotes(match));
+
+const normalizeResultMatches = (result: DataResults): Match[] => {
+  if (Array.isArray(result.matches) && result.matches.length) {
+    return result.matches;
+  }
+
+  if (Array.isArray(result.voices) && result.voices.length) {
+    return [
+      {
+        overall_degree: result.overall_degree ?? result.max_match_degree ?? 0,
+        voices: result.voices,
+        notes: flattenVoiceNotes(result.voices),
+      },
+    ];
+  }
+
+  return [];
+};
+
+const getMaxMatchDegree = (matches: Match[], currentMax: number | undefined): number => {
+  const matchMax = matches.reduce((max, match) => Math.max(max, match.overall_degree ?? 0), 0);
+  return Math.max(matchMax, currentMax ?? 0);
+};
+
+export const mergeResultsBySource = (results: DataResults[] = []): DataResults[] => {
+  const mergedResults: Record<string, DataResults> = {};
+
+  results.forEach((result) => {
+    if (!result.source) return;
+
+    const normalizedMatches = normalizeResultMatches(result);
+    const existingResult = mergedResults[result.source];
+
+    if (!existingResult) {
+      mergedResults[result.source] = {
+        ...result,
+        matches: normalizedMatches,
+        number_of_occurrences: normalizedMatches.length || result.number_of_occurrences || 0,
+        max_match_degree: getMaxMatchDegree(normalizedMatches, result.max_match_degree),
+      };
+      return;
+    }
+
+    const mergedMatches = [...(existingResult.matches ?? []), ...normalizedMatches];
+    mergedResults[result.source] = {
+      ...existingResult,
+      matches: mergedMatches,
+      number_of_occurrences: mergedMatches.length || existingResult.number_of_occurrences || 0,
+      max_match_degree: getMaxMatchDegree(mergedMatches, existingResult.max_match_degree),
+    };
+  });
+
+  return Object.values(mergedResults);
+};
 
 export const getNoteColor = (note: { note_deg?: number }): string => {
   const degree = typeof note.note_deg === 'number' ? note.note_deg : 0;

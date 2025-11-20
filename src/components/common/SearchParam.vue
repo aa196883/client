@@ -192,6 +192,7 @@
 import StaveRepresentation from '@/lib/stave.js';
 import { fetchSearchResults } from '@/services/dataBaseQueryServices';
 import { createNotesQueryParam } from '@/services/dataManagerServices';
+import { mergeResultsBySource } from '@/services/resultProcessingService';
 import { useAuthorsStore } from '@/stores/authorsStore.ts';
 import { useModesStore } from '@/stores/modesStore.ts';
 import { info_texts } from '@/constants/index.ts';
@@ -372,7 +373,7 @@ function searchButtonHandler() {
   }
 
   fetchSearchResults(searchParams).then((results) => {
-    emit('receiveData', results);
+    emit('receiveData', mergeResultsBySource(results));
   });
 }
 
