@@ -159,7 +159,7 @@ function LoadPageN() {
 
     fetchMeiFileByFileName(fileName, authors.selectedAuthorName).then((meiXML) => {
       // extract title
-      let { title, author, comment } = extractTitleAuthorComment(meiXML);
+      let { title, author, comment } = extractTitleAuthorComment(meiXML, fileName);
       item['title'] = title;
       item['author'] = author;
       item['comment'] = comment;
