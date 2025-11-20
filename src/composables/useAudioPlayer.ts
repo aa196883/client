@@ -8,6 +8,8 @@ interface ParsedNote {
   id: string;
 }
 
+type ParsedTrack = ParsedNote[];
+
 /**
  * Composable pour la gestion de la lecture audio avec Tone.js
  */
@@ -18,8 +20,9 @@ export function useAudioPlayer() {
   let highlightCallback: ((id: string) => void) | null = null;
   let removeHighlightCallback: (() => void) | null = null;
 
-  let synth: Tone.Synth | null = null;
-  let part: Tone.Part | null = null;
+  let synth: Tone.PolySynth<Tone.Synth> | null = null;
+  let parts: Tone.Part[] = [];
+  let lastHighlightTime: number | null = null;
 
   /**
    * Initialise Tone.js et crée un synthétiseur
@@ -30,43 +33,50 @@ export function useAudioPlayer() {
     }
 
     if (!synth) {
-      synth = new Tone.Synth().toDestination();
+      synth = new Tone.PolySynth(Tone.Synth).toDestination();
     }
   };
 
   /**
    * Parse le MEI XML pour extraire les notes et leurs informations
    */
-  const parseMeiToNotes = (meiXML: string): ParsedNote[] => {
+  const parseMeiToTracks = (meiXML: string): ParsedTrack[] => {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(meiXML, 'text/xml');
 
-    const noteElements = xmlDoc.querySelectorAll('note');
-    const parsedNotes: ParsedNote[] = [];
+    const staffElements = Array.from(xmlDoc.querySelectorAll('staff'));
+    const parsedTracks: ParsedTrack[] = [];
 
-    noteElements.forEach((noteEl, index) => {
-      const pitch = noteEl.getAttribute('pname');
-      const octave = noteEl.getAttribute('oct');
-      const duration = noteEl.getAttribute('dur') || '4';
-      const id = noteEl.getAttribute('xml:id');
+    staffElements.forEach((staffEl, staffIndex) => {
+      const parsedNotes: ParsedNote[] = [];
+      let currentTime = 0;
 
-      if (pitch && octave) {
-        // Convertir en notation Tone.js
-        const tonePitch = `${pitch.toUpperCase()}${octave}`;
+      staffEl.querySelectorAll('note').forEach((noteEl, noteIndex) => {
+        const pitch = noteEl.getAttribute('pname');
+        const octave = noteEl.getAttribute('oct');
+        const duration = noteEl.getAttribute('dur') || '4';
+        const id = noteEl.getAttribute('xml:id');
 
-        // Convertir la durée MEI en durée Tone.js
-        const toneDuration = convertMeiDurationToTone(duration);
+        if (pitch && octave) {
+          const tonePitch = `${pitch.toUpperCase()}${octave}`;
+          const toneDuration = convertMeiDurationToTone(duration);
+          parsedNotes.push({
+            pitch: tonePitch,
+            duration: toneDuration,
+            time: currentTime,
+            id: id || `staff-${staffIndex + 1}-note-${noteIndex}`,
+          });
 
-        parsedNotes.push({
-          pitch: tonePitch,
-          duration: toneDuration,
-          time: index * 0.5, // Timing basique, à améliorer
-          id: id || `note-${index}`,
-        });
+          currentTime += Tone.Time(toneDuration).toSeconds();
+        }
+      });
+
+      if (parsedNotes.length > 0) {
+        parsedTracks.push(parsedNotes);
       }
     });
 
-    return parsedNotes;
+    return parsedTracks;
   };
 
   /**
@@ -96,62 +106,58 @@ export function useAudioPlayer() {
       await initializeTone();
 
       // Parser les notes du MEI
-      const parsedNotes = parseMeiToNotes(meiXML);
+      const parsedTracks = parseMeiToTracks(meiXML);
 
-      if (parsedNotes.length === 0) {
+      if (parsedTracks.length === 0) {
         console.warn('Aucune note trouvée dans le MEI');
         return;
       }
 
-      // Définir le tempo
+      // Définir le tempo avant de créer les événements
       Tone.getTransport().bpm.value = tempo;
 
-      // Créer les événements pour Tone.Part
-      const events: Array<{ time: number; note: ParsedNote }> = [];
-      let currentTime = 0;
+      // Créer les événements pour chaque voix (piste)
+      const tracksEvents: Array<Array<{ time: number; note: ParsedNote }>> = parsedTracks.map(
+        (track) =>
+          track.map((note) => ({
+            time: note.time,
+            note,
+          })),
+      );
 
-      parsedNotes.forEach((note) => {
-        events.push({
-          time: currentTime,
-          note: note,
-        });
-
-        // Calculer le temps pour la prochaine note basé sur la durée actuelle
-        const noteDuration = Tone.Time(note.duration).toSeconds();
-        currentTime += noteDuration;
-      });
-
-      // Arrêter automatiquement à la fin
-      const lastEvent = events.length > 0 ? events[events.length - 1] : undefined;
-      const totalDuration = lastEvent ? lastEvent.time + Tone.Time(lastEvent.note.duration).toSeconds() : 0;
-
-      /*
-      events.reduce((total, event) => {
-        return total + Tone.Time(event.note.duration).toSeconds();
+      // Arrêter automatiquement à la fin (durée maximale parmi les pistes)
+      const totalDuration = parsedTracks.reduce((maxDuration, track) => {
+        if (track.length === 0) return maxDuration;
+        const lastNote = track[track.length - 1];
+        const trackDuration = lastNote.time + Tone.Time(lastNote.duration).toSeconds();
+        return Math.max(maxDuration, trackDuration);
       }, 0);
-      */
+
       Tone.getTransport().scheduleOnce(() => {
         stopScore();
       }, totalDuration);
 
-      // Créer un Part avec les événements
-      part = new Tone.Part((time, event) => {
-        // Jouer la note
-        if (synth) {
-          synth.triggerAttackRelease(event.note.pitch, event.note.duration, time);
-        }
+      // Créer un Part pour chaque piste
+      parts = tracksEvents.map((events) =>
+        new Tone.Part((time, event) => {
+          if (synth) {
+            synth.triggerAttackRelease(event.note.pitch, event.note.duration, time);
+          }
 
-        // Surligner la note si un callback est défini
-        if (highlightCallback) {
-          Tone.getDraw().schedule(() => {
-            removeHighlightCallback?.(); // Retirer le surlignage précédent
-            highlightCallback?.(event.note.id); // Surligner la note actuelle
-          }, time);
-        }
-      }, events);
+          if (highlightCallback) {
+            Tone.getDraw().schedule(() => {
+              if (lastHighlightTime !== time) {
+                removeHighlightCallback?.();
+                lastHighlightTime = time;
+              }
+              highlightCallback?.(event.note.id);
+            }, time);
+          }
+        }, events),
+      );
 
       // Démarrer la lecture
-      part.start();
+      parts.forEach((trackPart) => trackPart.start());
       Tone.getTransport().start();
 
       isPlayingAudio.value = true;
@@ -190,11 +196,13 @@ export function useAudioPlayer() {
    * Arrête la lecture
    */
   const stopScore = () => {
-    if (part) {
+    parts.forEach((part) => {
       part.stop();
       part.dispose();
-      part = null;
-    }
+    });
+    parts = [];
+
+    lastHighlightTime = null;
 
     Tone.getTransport().stop();
     Tone.getTransport().cancel();
