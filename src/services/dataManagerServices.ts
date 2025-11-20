@@ -95,7 +95,9 @@ export function createNotesQueryParam(melody: any, ignore_pitch: boolean, ignore
   return notes;
 }
 
-export function extractTitleFromMeiXML(meiXML: string): string {
+export function extractTitleFromMeiXML(meiXML: string, fileName?: string): string {
+  const meiFileName = fileName?.replace(/\.mei$/i, '');
+
   // Try to extract the title from the <pgHead> tag
   return (
     meiXML
@@ -106,7 +108,8 @@ export function extractTitleFromMeiXML(meiXML: string): string {
     meiXML
       .match(/<title>.*?<\/title>/s)?.[0]
       .match(/>.*?</s)?.[0]
-      .slice?.(1, -1) ?? // if no title found, return a default value
+      .slice?.(1, -1) ?? // if no title found, try to use the file name
+    meiFileName ?? // if no file name, return a default value
     'Titre inconnu'
   );
 }
@@ -147,11 +150,12 @@ export function extractCommentFromMeiXML(meiXML: string): string {
  * Extract the title, author and comment from the MEI file
  * it avoid text overlapping when the title, author and comment are too long.
  * @param {string} meiXML - the MEI file content
+ * @param {string} [fileName] - the MEI file name for fallback purposes
  * @returns {object} the title, author and comment
  */
-export function extractTitleAuthorComment(meiXML: string): {title: string, author: string, comment: string} {
+export function extractTitleAuthorComment(meiXML: string, fileName?: string): {title: string, author: string, comment: string} {
     // extract title, author and comment
-    const title = extractTitleFromMeiXML(meiXML);
+    const title = extractTitleFromMeiXML(meiXML, fileName);
     const author = extractAuthorFromMeiXML(meiXML);
     const comment = extractCommentFromMeiXML(meiXML);
 
