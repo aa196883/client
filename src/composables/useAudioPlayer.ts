@@ -44,39 +44,52 @@ export function useAudioPlayer() {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(meiXML, 'text/xml');
 
-    const staffElements = Array.from(xmlDoc.querySelectorAll('staff'));
+    const measureElements = Array.from(xmlDoc.querySelectorAll('measure'));
     const parsedTracks: ParsedTrack[] = [];
 
-    staffElements.forEach((staffEl, staffIndex) => {
-      const parsedNotes: ParsedNote[] = [];
-      let currentTime = 0;
+    // Build tracks per staff while keeping measures aligned
+    let measureStartTime = 0;
 
-      staffEl.querySelectorAll('note').forEach((noteEl, noteIndex) => {
-        const pitch = noteEl.getAttribute('pname');
-        const octave = noteEl.getAttribute('oct');
-        const duration = noteEl.getAttribute('dur') || '4';
-        const id = noteEl.getAttribute('xml:id');
+    measureElements.forEach((measureEl) => {
+      const staffElements = Array.from(measureEl.querySelectorAll(':scope > staff'));
+      const measureDurations: number[] = [];
 
-        if (pitch && octave) {
-          const tonePitch = `${pitch.toUpperCase()}${octave}`;
-          const toneDuration = convertMeiDurationToTone(duration);
-          parsedNotes.push({
-            pitch: tonePitch,
-            duration: toneDuration,
-            time: currentTime,
-            id: id || `staff-${staffIndex + 1}-note-${noteIndex}`,
-          });
-
-          currentTime += Tone.Time(toneDuration).toSeconds();
+      staffElements.forEach((staffEl, staffIndex) => {
+        const globalStaffIndex = Number(staffEl.getAttribute('n')) - 1 || staffIndex;
+        if (!parsedTracks[globalStaffIndex]) {
+          parsedTracks[globalStaffIndex] = [];
         }
+
+        let currentTimeInMeasure = 0;
+
+        staffEl.querySelectorAll('note').forEach((noteEl, noteIndex) => {
+          const pitch = noteEl.getAttribute('pname');
+          const octave = noteEl.getAttribute('oct');
+          const duration = noteEl.getAttribute('dur') || '4';
+          const id = noteEl.getAttribute('xml:id');
+
+          if (pitch && octave) {
+            const tonePitch = `${pitch.toUpperCase()}${octave}`;
+            const toneDuration = convertMeiDurationToTone(duration);
+            parsedTracks[globalStaffIndex].push({
+              pitch: tonePitch,
+              duration: toneDuration,
+              time: measureStartTime + currentTimeInMeasure,
+              id: id || `staff-${globalStaffIndex + 1}-note-${noteIndex}`,
+            });
+
+            currentTimeInMeasure += Tone.Time(toneDuration).toSeconds();
+          }
+        });
+
+        measureDurations.push(currentTimeInMeasure);
       });
 
-      if (parsedNotes.length > 0) {
-        parsedTracks.push(parsedNotes);
-      }
+      const maxMeasureDuration = measureDurations.length > 0 ? Math.max(...measureDurations) : 0;
+      measureStartTime += maxMeasureDuration;
     });
 
-    return parsedTracks;
+    return parsedTracks.filter((track) => track && track.length > 0);
   };
 
   /**
