@@ -3,12 +3,7 @@
     <!-- choose the collection in which to search -->
     <div class="collections-options">
       <label for="collections">Collection dans lesquelle rechercher : </label><br />
-      <select
-        id="collections"
-        name="collections"
-        v-model="authors.selectedAuthorName"
-        :disabled="sharedParametersLocked"
-      >
+      <select id="collections" name="collections" v-model="authors.selectedAuthorName">
         <option
           v-for="(author, index) in authors.listeAuthors"
           :key="index"
@@ -21,7 +16,7 @@
 
     <div class="modes-options">
       <label for="modes">Mode :</label><br />
-      <select id="modes" name="modes" v-model="modes.selectedModeIndex" :disabled="sharedParametersLocked">
+      <select id="modes" name="modes" v-model="modes.selectedModeIndex">
         <option
           v-for="(mode, index) in modes.listeModes"
           :key="index"
@@ -44,7 +39,6 @@
         :class="selectedButton == 'exact' ? 'selected' : ''"
         class="btn text-white"
         type="button"
-        :disabled="sharedParametersLocked"
       >
         Recherche exacte
       </button>
@@ -53,7 +47,6 @@
         :class="selectedButton == 'pitch' ? 'selected' : ''"
         class="btn text-white"
         type="button"
-        :disabled="sharedParametersLocked"
       >
         Recherche avec tolérance <br />
         sur la hauteur des notes
@@ -63,7 +56,6 @@
         :class="selectedButton == 'rhythm' ? 'selected' : ''"
         class="btn text-white"
         type="button"
-        :disabled="sharedParametersLocked"
       >
         Recherche avec tolérance <br />
         sur le rythme
@@ -93,7 +85,7 @@
               id="transpose-cb"
               type="checkbox"
               v-model="transposition_cb"
-              :disabled="!pitch_cb || sharedParametersLocked"
+              :disabled="!pitch_cb"
             />
             Autoriser les transpositions
           </label>
@@ -103,7 +95,7 @@
               id="homothety-cb"
               type="checkbox"
               v-model="homothety_cb"
-              :disabled="!rhythm_cb || sharedParametersLocked"
+              :disabled="!rhythm_cb"
             />
             Autoriser les variations de tempo
           </label>
@@ -113,7 +105,6 @@
               id="incipit-cb"
               type="checkbox"
               v-model="incipit_cb"
-              :disabled="sharedParametersLocked"
             />
             Chercher uniquement dans les incipits
           </label>
@@ -129,7 +120,7 @@
               id="pitch-dist-select"
               class="nb-select"
               v-model="pitch_dist"
-              :disabled="!pitch_cb || sharedParametersLocked"
+              :disabled="!pitch_cb"
             />
             <!-- <span class='tooltiptext'>Permet d'augmenter la tolérance sur la hauteur de note (en tons)</span> -->
           </label>
@@ -144,7 +135,7 @@
               id="duration-factor-select"
               class="nb-select-large"
               v-model="duration_factor"
-              :disabled="!rhythm_cb || sharedParametersLocked"
+              :disabled="!rhythm_cb"
             />
             <!-- <span class='tooltiptext'>Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).</span> -->
           </label>
@@ -159,7 +150,7 @@
               id="duration-gap-select"
               class="nb-select-large"
               v-model="duration_gap"
-              :disabled="!rhythm_cb || sharedParametersLocked"
+              :disabled="!rhythm_cb"
             />
             <!-- <span class='tooltiptext'>Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)</span> -->
           </label>
@@ -175,7 +166,6 @@
               id="alpha-select"
               class="nb-select"
               v-model="alpha"
-              :disabled="sharedParametersLocked"
             />
             %
             <!-- <span class='tooltiptext'>Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.</span> -->
@@ -223,8 +213,6 @@ const modes = useModesStore();
 const polyphonicStore = usePolyphonicSearchStore();
 const advancedOptionShow = ref(false); //flag for display advanced options or not
 const selectedButton = ref(''); // to highlight the selected button ('exact', 'pitch', 'rhythm' or '' when no button is selected)
-
-const sharedParametersLocked = computed(() => polyphonicStore.sharedParametersLocked);
 
 const tooltip = ref(null);
 
@@ -285,6 +273,11 @@ const toggleSelectedButton = (button) => {
 function searchButtonHandler() {
   const hasFrozenVoices = polyphonicStore.voices.length > 0;
   const activeMelodyLength = staveRepr.melody.length;
+  const allowTransposition = polyphonicStore.allowTransposition;
+  const allowHomothety = polyphonicStore.allowHomothety;
+  const pitchDistance = polyphonicStore.pitchDistance;
+  const durationFactor = polyphonicStore.durationFactor;
+  const durationGap = polyphonicStore.durationGap;
 
   if (!hasFrozenVoices && activeMelodyLength === 0) {
     alert('Stave is empty !\nPlease enter some notes to search for.');
@@ -298,14 +291,15 @@ function searchButtonHandler() {
     return;
   }
 
-  if (transposition_cb.value && activeMelodyLength === 1) {
+  if (allowTransposition && activeMelodyLength === 1) {
     alert('For transposition and contour search, at least two notes are needed (because it is based on interval between notes).');
     return;
   }
 
   const frozenVoices = polyphonicStore.frozenVoicesPayload;
+
   const hasInvalidFrozenVoice = frozenVoices.some(
-    (voice) => voice.allowTransposition && voice.noteCount < 2,
+    (voice) => allowTransposition && voice.noteCount < 2,
   );
 
   if (hasInvalidFrozenVoice) {
@@ -320,11 +314,11 @@ function searchButtonHandler() {
   const activeVoice = activeMelodyLength
     ? {
         notes: createNotesQueryParam(staveRepr.melody, !pitch_cb.value, !rhythm_cb.value),
-        pitchDistance: polyphonicStore.pitchDistance,
-        durationFactor: polyphonicStore.durationFactor,
-        durationGap: polyphonicStore.durationGap,
-        allowTransposition: polyphonicStore.allowTransposition,
-        allowHomothety: polyphonicStore.allowHomothety,
+        pitchDistance,
+        durationFactor,
+        durationGap,
+        allowTransposition,
+        allowHomothety,
         mode: modes.selectedModeName,
       }
     : null;
@@ -332,11 +326,11 @@ function searchButtonHandler() {
   const voicesPayload = [
     ...frozenVoices.map((voice) => ({
       notes: voice.notes,
-      pitchDistance: voice.pitchDistance,
-      durationFactor: voice.durationFactor,
-      durationGap: voice.durationGap,
-      allowTransposition: voice.allowTransposition,
-      allowHomothety: voice.allowHomothety,
+      pitchDistance,
+      durationFactor,
+      durationGap,
+      allowTransposition,
+      allowHomothety,
       mode: voice.mode,
     })),
   ];
@@ -349,9 +343,9 @@ function searchButtonHandler() {
     voicesPayload.push(activeVoice);
   }
 
-  const collection = polyphonicStore.sharedCollection ?? authors.selectedAuthorName;
+  const collection = authors.selectedAuthorName;
   const alphaValue = polyphonicStore.normalizedAlpha;
-  const incipitOnly = polyphonicStore.sharedIncipit;
+  const incipitOnly = polyphonicStore.incipitOnly;
 
   let searchParams;
 
@@ -361,12 +355,12 @@ function searchButtonHandler() {
       collection,
       mode: voice.mode,
       notes: voice.notes,
-      allow_transposition: voice.allowTransposition,
-      allow_homothety: voice.allowHomothety,
+      allow_transposition: allowTransposition,
+      allow_homothety: allowHomothety,
       incipit_only: incipitOnly,
-      pitch_distance: voice.pitchDistance,
-      duration_factor: voice.durationFactor,
-      duration_gap: voice.durationGap,
+      pitch_distance: pitchDistance,
+      duration_factor: durationFactor,
+      duration_gap: durationGap,
       alpha: alphaValue,
       contour_match: false,
     };
@@ -375,12 +369,12 @@ function searchButtonHandler() {
       collection,
       mode: voicesPayload.map((voice) => voice.mode ?? ''),
       notes: voicesPayload.map((voice) => voice.notes),
-      allow_transposition: voicesPayload.map((voice) => voice.allowTransposition),
-      allow_homothety: voicesPayload.map((voice) => voice.allowHomothety),
+      allow_transposition: voicesPayload.map(() => allowTransposition),
+      allow_homothety: voicesPayload.map(() => allowHomothety),
       incipit_only: incipitOnly,
-      pitch_distance: voicesPayload.map((voice) => voice.pitchDistance),
-      duration_factor: voicesPayload.map((voice) => voice.durationFactor),
-      duration_gap: voicesPayload.map((voice) => voice.durationGap),
+      pitch_distance: voicesPayload.map(() => pitchDistance),
+      duration_factor: voicesPayload.map(() => durationFactor),
+      duration_gap: voicesPayload.map(() => durationGap),
       alpha: alphaValue,
       contour_match: false,
     };
