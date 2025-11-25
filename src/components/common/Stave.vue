@@ -37,7 +37,12 @@
     </p>
 
     <div v-if="polyphonicStore.voices.length" class="frozen-staves">
-      <div v-for="voice in polyphonicStore.voices" :key="voice.id" class="frozen-stave">
+      <div
+        v-for="voice in polyphonicStore.voices"
+        :key="voice.id"
+        class="frozen-stave"
+        @click="makeFrozenVoiceEditable(voice)"
+      >
         <div class="frozen-stave-header">
           <span>Voix {{ voice.id }}</span>
           <span v-if="voice.parameters.modeLabel" class="mode-label">Mode : {{ voice.parameters.modeLabel }}</span>
@@ -55,7 +60,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import Player from '@/lib/player.js';
 import StaveRepresentation from '@/lib/stave.js';
 import { computed, onMounted } from 'vue';
@@ -63,6 +68,7 @@ import { usePolyphonicSearchStore } from '@/stores/polyphonicSearchStore.ts';
 import { useModesStore } from '@/stores/modesStore.ts';
 import { useAuthorsStore } from '@/stores/authorsStore.ts';
 import { createNotesQueryParam } from '@/services/dataManagerServices';
+import type { FrozenVoice } from '@/stores/polyphonicSearchStore.ts';
 
 defineOptions({
   name: 'Stave',
@@ -78,8 +84,9 @@ const showMaxVoicesWarning = computed(
   () => polyphonicStore.voices.length >= polyphonicStore.maxVoices,
 );
 
-function keyListener(event) {
-  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+function keyListener(event: KeyboardEvent) {
+  const target = event.target as HTMLElement | null;
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
     // Ignore key events if the target is an input or textarea
     return;
   }
@@ -114,19 +121,23 @@ function handleClearAll() {
 }
 
 function freezeCurrentStave() {
+  freezeActiveStave();
+}
+
+function freezeActiveStave(): boolean {
   if (staveRepr.melody.length === 0) {
-    return;
+    return false;
   }
 
   if (polyphonicStore.voices.length >= polyphonicStore.maxVoices) {
     alert(`Nombre maximum de portées (${polyphonicStore.maxVoices}) atteint.`);
-    return;
+    return false;
   }
 
   const container = document.getElementById('music-score');
   const svgElement = container?.querySelector('svg');
   if (!svgElement) {
-    return;
+    return false;
   }
 
   const notesQueryParam = createNotesQueryParam(
@@ -138,6 +149,7 @@ function freezeCurrentStave() {
   const success = polyphonicStore.addFrozenVoice({
     svgMarkup: svgElement.outerHTML,
     notes: notesQueryParam,
+    melody: staveRepr.serializeMelody(),
     mode: modes.selectedModeName,
     modeLabel: modes.listeModes[modes.selectedModeIndex] ?? null,
     noteCount: staveRepr.melody.length,
@@ -146,10 +158,36 @@ function freezeCurrentStave() {
 
   if (!success) {
     alert(`Nombre maximum de portées (${polyphonicStore.maxVoices}) atteint.`);
-    return;
+    return false;
   }
 
   staveRepr.clear_all_pattern();
+  return true;
+}
+
+function makeFrozenVoiceEditable(voice: FrozenVoice) {
+  const removedVoice = polyphonicStore.removeFrozenVoice(voice.id);
+  if (!removedVoice) {
+    return;
+  }
+
+  if (staveRepr.melody.length > 0) {
+    const saved = freezeActiveStave();
+    if (!saved) {
+      polyphonicStore.restoreFrozenVoice(removedVoice.voice, removedVoice.index);
+      return;
+    }
+  }
+
+  if (removedVoice.voice.parameters.modeLabel) {
+    const modeIndex = modes.listeModes.indexOf(removedVoice.voice.parameters.modeLabel);
+    modes.setMode(modeIndex >= 0 ? modeIndex : 0);
+  } else {
+    modes.setMode(0);
+  }
+
+  staveRepr.loadSerializedMelody(removedVoice.voice.melody);
+  polyphonicStore.applyFrozenVoiceParameters(removedVoice.voice.parameters);
 }
 </script>
 
@@ -204,6 +242,7 @@ function freezeCurrentStave() {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  cursor: pointer;
 }
 
 .frozen-stave-header {

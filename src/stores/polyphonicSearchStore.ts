@@ -1,5 +1,12 @@
 import { defineStore } from 'pinia';
 
+export interface SerializedNote {
+  keys: string[];
+  duration: string;
+  dots: number;
+  noteType: string | null;
+}
+
 export interface FrozenVoiceParameters {
   pitchDistance: number;
   durationFactor: number;
@@ -15,7 +22,13 @@ export interface FrozenVoice {
   id: number;
   svgMarkup: string;
   notes: string;
+  melody: SerializedNote[];
   parameters: FrozenVoiceParameters;
+}
+
+interface RemovedVoiceResult {
+  voice: FrozenVoice;
+  index: number;
 }
 
 export interface VoiceSearchPayload {
@@ -52,7 +65,11 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
     lockedIncipitOnly: null as boolean | null,
   }),
   getters: {
-    sharedParametersLocked: (state) => state.voices.length > 0,
+    sharedParametersLocked: (state) =>
+      state.voices.length > 0 ||
+      state.lockedCollection !== null ||
+      state.lockedAlpha !== null ||
+      state.lockedIncipitOnly !== null,
     sharedCollection: (state) => state.lockedCollection,
     sharedAlpha(state): number {
       return state.lockedAlpha ?? state.alpha;
@@ -130,6 +147,7 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
     addFrozenVoice(payload: {
       svgMarkup: string;
       notes: string;
+      melody: SerializedNote[];
       mode: string | null;
       modeLabel: string | null;
       noteCount: number;
@@ -144,6 +162,7 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
         id: voiceId,
         svgMarkup: payload.svgMarkup,
         notes: payload.notes,
+        melody: payload.melody,
         parameters: {
           pitchDistance: this.pitchDistance,
           durationFactor: this.durationFactor,
@@ -163,6 +182,33 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
       }
 
       return true;
+    },
+    removeFrozenVoice(voiceId: number): RemovedVoiceResult | null {
+      const voiceIndex = this.voices.findIndex((voice) => voice.id === voiceId);
+      if (voiceIndex === -1) {
+        return null;
+      }
+
+      const [removedVoice] = this.voices.splice(voiceIndex, 1);
+      this.reindexVoices();
+
+      return { voice: removedVoice, index: voiceIndex };
+    },
+    restoreFrozenVoice(voice: FrozenVoice, index?: number) {
+      const insertIndex =
+        index === undefined || index < 0 || index > this.voices.length ? this.voices.length : index;
+      this.voices.splice(insertIndex, 0, voice);
+      this.reindexVoices();
+    },
+    applyFrozenVoiceParameters(parameters: FrozenVoiceParameters) {
+      this.pitchDistance = parameters.pitchDistance;
+      this.durationFactor = parameters.durationFactor;
+      this.durationGap = parameters.durationGap;
+      this.allowTransposition = parameters.allowTransposition;
+      this.allowHomothety = parameters.allowHomothety;
+    },
+    reindexVoices() {
+      this.voices = this.voices.map((voice, index) => ({ ...voice, id: index + 1 }));
     },
     clearFrozenVoices() {
       this.voices = [];
