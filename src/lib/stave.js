@@ -122,7 +122,7 @@ class StaveRepresentation {
    * @param {string[]} keys - array of keys ;
    * @param {string} duration - the note duration (w, h, q, 8, 16, 32, hd, qd, 8d, 16d, 32d).
    */
-  displayNote(note, keys, duration) {
+  displayNote(note, keys, duration, dots = 0) {
     let display_note;
     if (note == 'r') {
       display_note = new StaveNote({
@@ -141,9 +141,11 @@ class StaveRepresentation {
 
     if (note.includes('#')) display_note.addModifier(new Accidental('#'), 0);
 
-    if (duration.includes('d'))
-      // display_note.addModifier(new Dot(), 0);
-      Dot.buildAndAttach([display_note], { all: true });
+    if (dots > 0) {
+      for (let i = 0; i < dots; i += 1) {
+        Dot.buildAndAttach([display_note], { all: true });
+      }
+    }
 
     this.melody.push(display_note);
 
@@ -208,6 +210,28 @@ class StaveRepresentation {
     });
 
     this.resizeStave();
+  }
+
+  serializeMelody() {
+    return this.melody.map((note) => ({
+      keys: [...note.keys],
+      duration: note.duration,
+      dots: note.dots || 0,
+      noteType: note.noteType ?? null,
+    }));
+  }
+
+  loadSerializedMelody(serializedMelody) {
+    this.clear_all_pattern();
+
+    serializedMelody.forEach((noteData) => {
+      const dotCount = noteData.dots || 0;
+      const duration = noteData.duration;
+      const noteKeys = noteData.keys && noteData.keys.length ? noteData.keys : ['B/4'];
+      const noteLabel = noteData.noteType === 'r' ? 'r' : noteKeys[0] ?? 'r';
+
+      this.displayNote(noteLabel, noteKeys, duration, dotCount);
+    });
   }
 }
 
