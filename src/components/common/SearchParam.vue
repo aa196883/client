@@ -7,7 +7,7 @@
         id="collections"
         name="collections"
         v-model="authors.selectedAuthorName"
-        :disabled="polyphonicStore.sharedParametersLocked"
+        :disabled="sharedParametersLocked"
       >
         <option
           v-for="(author, index) in authors.listeAuthors"
@@ -21,7 +21,7 @@
 
     <div class="modes-options">
       <label for="modes">Mode :</label><br />
-      <select id="modes" name="modes" v-model="modes.selectedModeIndex">
+      <select id="modes" name="modes" v-model="modes.selectedModeIndex" :disabled="sharedParametersLocked">
         <option
           v-for="(mode, index) in modes.listeModes"
           :key="index"
@@ -44,6 +44,7 @@
         :class="selectedButton == 'exact' ? 'selected' : ''"
         class="btn text-white"
         type="button"
+        :disabled="sharedParametersLocked"
       >
         Recherche exacte
       </button>
@@ -52,6 +53,7 @@
         :class="selectedButton == 'pitch' ? 'selected' : ''"
         class="btn text-white"
         type="button"
+        :disabled="sharedParametersLocked"
       >
         Recherche avec tolérance <br />
         sur la hauteur des notes
@@ -61,6 +63,7 @@
         :class="selectedButton == 'rhythm' ? 'selected' : ''"
         class="btn text-white"
         type="button"
+        :disabled="sharedParametersLocked"
       >
         Recherche avec tolérance <br />
         sur le rythme
@@ -86,12 +89,22 @@
           </label>
           <br />
           <label id="transpose-lb" class="tooltip-lb">
-            <input id="transpose-cb" type="checkbox" v-model="transposition_cb" :disabled="!pitch_cb" />
+            <input
+              id="transpose-cb"
+              type="checkbox"
+              v-model="transposition_cb"
+              :disabled="!pitch_cb || sharedParametersLocked"
+            />
             Autoriser les transpositions
           </label>
           <br />
           <label id="homothety-lb" class="tooltip-lb">
-            <input id="homothety-cb" type="checkbox" v-model="homothety_cb" :disabled="!rhythm_cb" />
+            <input
+              id="homothety-cb"
+              type="checkbox"
+              v-model="homothety_cb"
+              :disabled="!rhythm_cb || sharedParametersLocked"
+            />
             Autoriser les variations de tempo
           </label>
           <br />
@@ -100,7 +113,7 @@
               id="incipit-cb"
               type="checkbox"
               v-model="incipit_cb"
-              :disabled="polyphonicStore.sharedParametersLocked"
+              :disabled="sharedParametersLocked"
             />
             Chercher uniquement dans les incipits
           </label>
@@ -116,7 +129,7 @@
               id="pitch-dist-select"
               class="nb-select"
               v-model="pitch_dist"
-              :disabled="!pitch_cb"
+              :disabled="!pitch_cb || sharedParametersLocked"
             />
             <!-- <span class='tooltiptext'>Permet d'augmenter la tolérance sur la hauteur de note (en tons)</span> -->
           </label>
@@ -131,7 +144,7 @@
               id="duration-factor-select"
               class="nb-select-large"
               v-model="duration_factor"
-              :disabled="!rhythm_cb"
+              :disabled="!rhythm_cb || sharedParametersLocked"
             />
             <!-- <span class='tooltiptext'>Permet d'augmenter la tolérance sur la durée des notes (coefficient multiplicateur).</span> -->
           </label>
@@ -146,7 +159,7 @@
               id="duration-gap-select"
               class="nb-select-large"
               v-model="duration_gap"
-              :disabled="!rhythm_cb"
+              :disabled="!rhythm_cb || sharedParametersLocked"
             />
             <!-- <span class='tooltiptext'>Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)</span> -->
           </label>
@@ -162,7 +175,7 @@
               id="alpha-select"
               class="nb-select"
               v-model="alpha"
-              :disabled="polyphonicStore.sharedParametersLocked"
+              :disabled="sharedParametersLocked"
             />
             %
             <!-- <span class='tooltiptext'>Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.</span> -->
@@ -210,6 +223,8 @@ const modes = useModesStore();
 const polyphonicStore = usePolyphonicSearchStore();
 const advancedOptionShow = ref(false); //flag for display advanced options or not
 const selectedButton = ref(''); // to highlight the selected button ('exact', 'pitch', 'rhythm' or '' when no button is selected)
+
+const sharedParametersLocked = computed(() => polyphonicStore.sharedParametersLocked);
 
 const tooltip = ref(null);
 
