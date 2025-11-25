@@ -81,7 +81,7 @@ const authors = useAuthorsStore();
 const paginatedScores = ref([]);
 const isModalOpen = ref(false);
 const selectedScore = ref({});
-let nbScores = computed(() => {
+const nbScores = computed(() => {
   return props.data.length;
 });
 const pageNb = ref(0);
@@ -159,7 +159,7 @@ function LoadPageN() {
 
     fetchMeiFileByFileName(fileName, authors.selectedAuthorName).then((meiXML) => {
       // extract title
-      let { title, author, comment } = extractTitleAuthorComment(meiXML, fileName);
+      const { title, author, comment } = extractTitleAuthorComment(meiXML, fileName);
       item['title'] = title;
       item['author'] = author;
       item['comment'] = comment;

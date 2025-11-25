@@ -81,7 +81,7 @@ export function createNotesQueryParam(melody: any, ignore_pitch: boolean, ignore
     notes = notes.slice(0, -2) + '], '; // Remove trailing ', '
 
     //---Add duration
-    if (ignore_rhythm) notes += 'None, 0), ';
+    if (ignore_rhythm) notes += 'None, None), ';
     else {
       const dur = 1 / durationNote[melody[k].duration];
       const dots = melody[k].dots || 0;
