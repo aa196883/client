@@ -8,14 +8,11 @@ export interface SerializedNote {
 }
 
 export interface FrozenVoiceParameters {
-  pitchDistance: number;
-  durationFactor: number;
-  durationGap: number;
-  allowTransposition: boolean;
-  allowHomothety: boolean;
   mode: string | null;
   modeLabel: string | null;
   noteCount: number;
+  pitchEnabled: boolean;
+  rhythmEnabled: boolean;
 }
 
 export interface FrozenVoice {
@@ -33,13 +30,10 @@ interface RemovedVoiceResult {
 
 export interface VoiceSearchPayload {
   notes: string;
-  pitchDistance: number;
-  durationFactor: number;
-  durationGap: number;
-  allowTransposition: boolean;
-  allowHomothety: boolean;
   mode: string | null;
   noteCount: number;
+  pitchEnabled: boolean;
+  rhythmEnabled: boolean;
 }
 
 function toNumber(value: string | number): number {
@@ -60,36 +54,18 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
     durationFactor: 1,
     durationGap: 0,
     alpha: 0,
-    lockedCollection: null as string | null,
-    lockedAlpha: null as number | null,
-    lockedIncipitOnly: null as boolean | null,
   }),
   getters: {
-    sharedParametersLocked: (state) =>
-      state.voices.length > 0 ||
-      state.lockedCollection !== null ||
-      state.lockedAlpha !== null ||
-      state.lockedIncipitOnly !== null,
-    sharedCollection: (state) => state.lockedCollection,
-    sharedAlpha(state): number {
-      return state.lockedAlpha ?? state.alpha;
-    },
-    sharedIncipit(state): boolean {
-      return state.lockedIncipitOnly ?? state.incipitOnly;
-    },
     normalizedAlpha(): number {
-      return this.sharedAlpha / 100;
+      return this.alpha / 100;
     },
     frozenVoicesPayload(state): VoiceSearchPayload[] {
       return state.voices.map((voice) => ({
         notes: voice.notes,
-        pitchDistance: voice.parameters.pitchDistance,
-        durationFactor: voice.parameters.durationFactor,
-        durationGap: voice.parameters.durationGap,
-        allowTransposition: voice.parameters.allowTransposition,
-        allowHomothety: voice.parameters.allowHomothety,
         mode: voice.parameters.mode,
         noteCount: voice.parameters.noteCount,
+        pitchEnabled: voice.parameters.pitchEnabled,
+        rhythmEnabled: voice.parameters.rhythmEnabled,
       }));
     },
   },
@@ -125,15 +101,9 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
     setAlpha(value: number | string) {
       const parsed = toNumber(value);
       this.alpha = parsed < 0 ? 0 : parsed;
-      if (this.sharedParametersLocked && this.lockedAlpha !== null) {
-        this.lockedAlpha = this.alpha;
-      }
     },
     setIncipitOnly(value: boolean) {
       this.incipitOnly = value;
-      if (this.sharedParametersLocked && this.lockedIncipitOnly !== null) {
-        this.lockedIncipitOnly = value;
-      }
     },
     resetActiveParameters() {
       this.pitchEnabled = true;
@@ -164,22 +134,13 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
         notes: payload.notes,
         melody: payload.melody,
         parameters: {
-          pitchDistance: this.pitchDistance,
-          durationFactor: this.durationFactor,
-          durationGap: this.durationGap,
-          allowTransposition: this.allowTransposition,
-          allowHomothety: this.allowHomothety,
           mode: payload.mode,
           modeLabel: payload.modeLabel,
           noteCount: payload.noteCount,
+          pitchEnabled: this.pitchEnabled,
+          rhythmEnabled: this.rhythmEnabled,
         },
       });
-
-      if (!this.sharedParametersLocked) {
-        this.lockedCollection = payload.collection;
-        this.lockedAlpha = this.alpha;
-        this.lockedIncipitOnly = this.incipitOnly;
-      }
 
       return true;
     },
@@ -201,20 +162,14 @@ export const usePolyphonicSearchStore = defineStore('polyphonicSearch', {
       this.reindexVoices();
     },
     applyFrozenVoiceParameters(parameters: FrozenVoiceParameters) {
-      this.pitchDistance = parameters.pitchDistance;
-      this.durationFactor = parameters.durationFactor;
-      this.durationGap = parameters.durationGap;
-      this.allowTransposition = parameters.allowTransposition;
-      this.allowHomothety = parameters.allowHomothety;
+      this.pitchEnabled = parameters.pitchEnabled;
+      this.rhythmEnabled = parameters.rhythmEnabled;
     },
     reindexVoices() {
       this.voices = this.voices.map((voice, index) => ({ ...voice, id: index + 1 }));
     },
     clearFrozenVoices() {
       this.voices = [];
-      this.lockedCollection = null;
-      this.lockedAlpha = null;
-      this.lockedIncipitOnly = null;
     },
   },
 });

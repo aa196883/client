@@ -49,11 +49,8 @@
         </div>
         <div class="frozen-stave-score" v-html="voice.svgMarkup"></div>
         <div class="frozen-stave-parameters">
-          <span>Tolérance hauteur : {{ voice.parameters.pitchDistance }}</span>
-          <span>Facteur de durée : {{ voice.parameters.durationFactor }}</span>
-          <span>Écart de durée : {{ voice.parameters.durationGap }}</span>
-          <span>Transposition : {{ voice.parameters.allowTransposition ? 'Oui' : 'Non' }}</span>
-          <span>Homothétie : {{ voice.parameters.allowHomothety ? 'Oui' : 'Non' }}</span>
+          <span>Hauteur des notes : {{ voice.parameters.pitchEnabled ? 'Oui' : 'Non' }}</span>
+          <span>Rythme : {{ voice.parameters.rhythmEnabled ? 'Oui' : 'Non' }}</span>
         </div>
       </div>
     </div>
