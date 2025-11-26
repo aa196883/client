@@ -207,12 +207,38 @@ const closeModal = () => {
   selectedScore.value = {};
 };
 
+function getScoreDegree(score) {
+  if (!score || typeof score !== 'object') return 0;
+
+  const candidateDegrees = [];
+
+  if (typeof score.overall_degree === 'number') {
+    candidateDegrees.push(score.overall_degree);
+  }
+
+  if (typeof score.max_match_degree === 'number') {
+    candidateDegrees.push(score.max_match_degree);
+  }
+
+  if (Array.isArray(score.matches)) {
+    const matchDegree = Math.max(
+      ...score.matches.map((match) => (typeof match?.overall_degree === 'number' ? match.overall_degree : 0)),
+    );
+    candidateDegrees.push(matchDegree);
+  }
+
+  if (Array.isArray(score.voices)) {
+    const voiceDegree = Math.max(
+      ...score.voices.map((voice) => (typeof voice?.voice_degree === 'number' ? voice.voice_degree : 0)),
+    );
+    candidateDegrees.push(voiceDegree);
+  }
+
+  return Math.max(...candidateDegrees, 0);
+}
+
 function sortByMatchDegree(scores) {
-  return scores.slice().sort((a, b) => {
-    const degA = a.max_match_degree ?? 0;
-    const degB = b.max_match_degree ?? 0;
-    return degB - degA;
-  });
+  return scores.slice().sort((a, b) => getScoreDegree(b) - getScoreDegree(a));
 }
 
 </script>
