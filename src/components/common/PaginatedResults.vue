@@ -79,8 +79,10 @@ const props = defineProps({
 const verovio = useVerovioStore();
 const authors = useAuthorsStore();
 const paginatedScores = ref([]);
+const currentPageSources = ref([]);
 const isModalOpen = ref(false);
 const selectedScore = ref({});
+const currentRenderCycle = ref(0);
 const nbScores = computed(() => {
   return props.data.length;
 });
@@ -137,15 +139,19 @@ watch(
 );
 
 function LoadPageN() {
+  const renderId = ++currentRenderCycle.value;
   // remove the previous scores
   paginatedScores.value = [];
+  currentPageSources.value = [];
 
   // slice the data from the page requested
   const dataSlice = getPageN(sortedData.value, pageNb.value, nbPerPage.value);
+  currentPageSources.value = dataSlice.map((data) => (typeof data === 'string' ? data : data.source));
+  paginatedScores.value = Array(dataSlice.length).fill(null);
 
   // check if the data is a collection data or a search result
   const isCollectionData = typeof dataSlice[0] === 'string';
-  dataSlice.forEach((data) => {
+  dataSlice.forEach((data, position) => {
     let item;
     let fileName;
 
@@ -163,11 +169,12 @@ function LoadPageN() {
       item['title'] = title;
       item['author'] = author;
       item['comment'] = comment;
-      paginatedScores.value.push(item);
+      insertScoreAtPosition(position, item, renderId);
       // remove title, author and comment that are overlapping each other and are not useful in the preview
       meiXML = removePgHead(meiXML);
       item['meiXML'] = meiXML; // store the meiXML in the item for later use in the modal
       verovio.ensureTkInitialized().then(() => {
+        if (renderId !== currentRenderCycle.value) return; // abandon outdated render cycles
         // parameters for rendering
         // same as in ejs version
         // parameter never used in the ejs version only the preset value
@@ -190,6 +197,7 @@ function LoadPageN() {
             // color the matches
             colorMatches(paginatedScores.value[index]);
           }
+          ensurePageOrder(renderId);
         }
       });
     });
@@ -207,12 +215,68 @@ const closeModal = () => {
   selectedScore.value = {};
 };
 
+function getScoreDegree(score) {
+  if (!score || typeof score !== 'object') return 0;
+
+  const candidateDegrees = [];
+
+  if (typeof score.overall_degree === 'number') {
+    candidateDegrees.push(score.overall_degree);
+  }
+
+  if (typeof score.max_match_degree === 'number') {
+    candidateDegrees.push(score.max_match_degree);
+  }
+
+  if (Array.isArray(score.matches)) {
+    const matchDegree = Math.max(
+      ...score.matches.map((match) => (typeof match?.overall_degree === 'number' ? match.overall_degree : 0)),
+    );
+    candidateDegrees.push(matchDegree);
+  }
+
+  if (Array.isArray(score.voices)) {
+    const voiceDegree = Math.max(
+      ...score.voices.map((voice) => (typeof voice?.voice_degree === 'number' ? voice.voice_degree : 0)),
+    );
+    candidateDegrees.push(voiceDegree);
+  }
+
+  return Math.max(...candidateDegrees, 0);
+}
+
 function sortByMatchDegree(scores) {
-  return scores.slice().sort((a, b) => {
-    const degA = a.max_match_degree ?? 0;
-    const degB = b.max_match_degree ?? 0;
-    return degB - degA;
-  });
+  return scores.slice().sort((a, b) => getScoreDegree(b) - getScoreDegree(a));
+}
+
+function insertScoreAtPosition(position, score, renderId) {
+  if (renderId !== currentRenderCycle.value) return;
+  if (position < 0) {
+    paginatedScores.value.push(score);
+  } else if (position < paginatedScores.value.length) {
+    paginatedScores.value.splice(position, 1, score);
+  } else {
+    paginatedScores.value[position] = score;
+  }
+}
+
+function ensurePageOrder(renderId) {
+  if (renderId !== currentRenderCycle.value) return;
+
+  const sourceOrder = new Map(currentPageSources.value.map((source, index) => [source, index]));
+
+  paginatedScores.value = paginatedScores.value
+    .slice()
+    .sort((a, b) => {
+      const sourceIndexA = sourceOrder.has(a?.source) ? sourceOrder.get(a.source) : Number.POSITIVE_INFINITY;
+      const sourceIndexB = sourceOrder.has(b?.source) ? sourceOrder.get(b.source) : Number.POSITIVE_INFINITY;
+
+      if (sourceIndexA !== sourceIndexB) {
+        return sourceIndexA - sourceIndexB;
+      }
+
+      return getScoreDegree(b) - getScoreDegree(a);
+    });
 }
 
 </script>
