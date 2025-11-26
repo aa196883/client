@@ -2,7 +2,8 @@
   <div class="search-param">
     <!-- choose the collection in which to search -->
     <div class="collections-options">
-      <label for="collections">Collection dans lesquelle rechercher : </label><br />
+      <!-- <label for="collections">Collection dans lesquelle rechercher : </label><br /> -->
+      <label for="collections">Collection (demo EDBT) : </label><br />
       <select id="collections" name="collections" v-model="authors.selectedAuthorName">
         <option
           v-for="(author, index) in authors.listeAuthors"
@@ -14,7 +15,7 @@
       </select>
     </div>
 
-    <div class="modes-options">
+    <!-- <div class="modes-options">
       <label for="modes">Mode :</label><br />
       <select id="modes" name="modes" v-model="modes.selectedModeIndex">
         <option
@@ -25,7 +26,7 @@
           {{ mode }}
         </option>
       </select>
-    </div>
+    </div> -->
 
     <hr />
 

@@ -45,7 +45,7 @@
       >
         <div class="frozen-stave-header">
           <span>Voix {{ voice.id }}</span>
-          <span v-if="voice.parameters.modeLabel" class="mode-label">Mode : {{ voice.parameters.modeLabel }}</span>
+          <!-- <span v-if="voice.parameters.modeLabel" class="mode-label">Mode : {{ voice.parameters.modeLabel }}</span> -->
         </div>
         <div class="frozen-stave-score" v-html="voice.svgMarkup"></div>
         <div class="frozen-stave-parameters">
