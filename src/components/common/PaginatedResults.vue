@@ -25,7 +25,7 @@
       <h3 v-else-if="props.data.length == 0" class="text-center">Aucun résultat</h3>
       <div v-else v-for="(score, index) in paginatedScores" :key="index" class="score-preview" @click="openScoreDetail(score)">
         <div class="music-score-box" :id="score.source" v-html="score.svg"></div>
-        <p v-if="score.number_of_occurrences" class="score_author">Occurences : {{ score.number_of_occurrences }}</p>
+        <p v-if="score.number_of_occurrences" class="score_author">Occurrences : {{ score.number_of_occurrences }}</p>
         <p v-if="score.max_match_degree" class="score_author">Satisfaction : {{ Math.floor(score.max_match_degree * 100) }}%</p>
         <h4 v-if="score.title" class="score_title">{{ score.title }}</h4>
       </div>

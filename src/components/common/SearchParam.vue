@@ -156,7 +156,7 @@
             <!-- <span class='tooltiptext'>Permet de sauter des notes (en durée : 1 pour pleine, 0.5 pour ronde, 0.25 pour croche, ...)</span> -->
           </label>
 
-          <label class="tooltip-lb" id="alpha-lb">
+          <!-- <label class="tooltip-lb" id="alpha-lb">
             Alpha
             <input
               type="number"
@@ -169,8 +169,7 @@
               v-model="alpha"
             />
             %
-            <!-- <span class='tooltiptext'>Permet de filtrer les résultats en retirant tous ceux qui ont un score inférieur à alpha.</span> -->
-          </label>
+          </label> -->
 
           <hr />
 
@@ -413,7 +412,7 @@ function pitchToleranteSearchButtonHandler() {
   pitch_dist.value = 3;
   duration_factor.value = 1.5;
   duration_gap.value = 0;
-  alpha.value = 50;
+  alpha.value = 0;
 
   toggleSelectedButton('pitch');
 
@@ -430,7 +429,7 @@ function rhythmToleranteSearchButtonHandler() {
   pitch_dist.value = 1;
   duration_factor.value = 4;
   duration_gap.value = 0.0625;
-  alpha.value = 50;
+  alpha.value = 0;
 
   toggleSelectedButton('rhythm');
 
