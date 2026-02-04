@@ -23,6 +23,13 @@ export const useAuthorsStore = defineStore('authors', {
     setAuthors(newAuthors: string[]) {
       this.listeAuthors = newAuthors;
     },
+    /**
+     * Set the selected author index.
+     * @param index - The index of the selected author.
+     */
+    setSelectedAuthorIndex(index: number) {
+      this.selectedAuthorIndex = index;
+    },
 
     /**
      * Load authors from the server and update the store
