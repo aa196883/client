@@ -4,7 +4,7 @@
     <div class="collections-options">
       <!-- <label for="collections">Collection dans lesquelle rechercher : </label><br /> -->
       <label for="collections">Collection (demo EDBT) : </label><br />
-      <select id="collections" name="collections" v-model="authors.selectedAuthorName">
+      <select id="collections" name="collections" v-model="selectedAuthorName">
         <option
           v-for="(author, index) in authors.listeAuthors"
           :key="index"
@@ -215,6 +215,13 @@ const advancedOptionShow = ref(false); //flag for display advanced options or no
 const selectedButton = ref(''); // to highlight the selected button ('exact', 'pitch', 'rhythm' or '' when no button is selected)
 
 const tooltip = ref(null);
+const selectedAuthorName = computed({
+  get: () => authors.selectedAuthorName,
+  set: (value) => {
+    const authorIndex = authors.listeAuthors.indexOf(value);
+    authors.setSelectedAuthorIndex(authorIndex >= 0 ? authorIndex : 0);
+  },
+});
 
 //======== Options for search buttons ========//
 // checkbox
