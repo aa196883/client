@@ -34,8 +34,9 @@
             <li><strong>Adel Aly</strong> (poursuite du dev. de l'interface utilisateur et back-end)</li>
             <li><strong>Pierre Alain</strong> (mise en œuvre de l'architecture)</li>
             <li><strong>Vincent Barreaud</strong> (dev. de l'interface utilisateur et back-end)</li>
+            <li><strong>Laurent Garnier</strong> (déploiement)</li>
             <li><strong>Jules Gobillot</strong> (poursuite du dev. de l'interface utilisateur)</li>
-            <li><strong>Anne-Marie Nicol</strong> (amorce projet, références collections et contacts musique traditionnelle)</li>
+            <li><strong>Anne-Marie Nicol </strong> (amorce projet, références collections et contacts musique traditionnelle)</li>
             <li><strong>Tommaso Padovano</strong> (dev. de l'interface utilisateur et back-end)</li>
             <li><strong>Gwenaël Piel</strong> (encodage des collections J. Mahé)</li>
             <li><strong>Virginie Thion</strong> (génération des formats de données, dev. base de données)</li>
