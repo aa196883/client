@@ -10,24 +10,68 @@
           <ul class="list-unstyled">
             <li>
               <i>
-                <a href="https://hal.science/hal-04681804v1" target="_blank"
-                  >Database Approaches to the Modelling and Querying of Musical Scores: a Survey.</a
+                <a href="https://hal.science/hal-05485122v2" target="_blank"
+                  >Where Graphs Meet Fuzzy Logic — A DBMS-Centered Engine for Polyphonic Music Matching in Score Databases</a
                 >
               </i>
               <br />
               <span class="text-muted"
-                >Adel Aly, Olivier Pivert, Virginie Thion - Proceedings of the Intl. Conf. on Theory and Practice of Digital
+                >Adel Aly, Olivier Pivert, Virginie Thion — Proceedings of the International Conference on Extending Database Technology
+                (EDBT'2026), Tampere, Finland</span
+              >
+            </li>
+            <li>
+              <i>
+                <a href="https://hal.science/hal-05050369v1" target="_blank">Fuzzy Retrieval of Musical Scores Based on Melodic Patterns</a>
+              </i>
+              <br />
+              <span class="text-muted"
+                >Adel Aly, Olivier Pivert, Virginie Thion — Proceedings of the IEEE International Conference on Fuzzy Systems (FUZZ-IEEE'25),
+                Reims, France</span
+              >
+            </li>
+            <li>
+              <i>
+                <a href="https://hal.science/hal-05011084v1" target="_blank"
+                  >A Flexible Framework for Transposition-Aware Querying of a Musical Score Database (Best Paper Award RCIS 2025)</a
+                >
+              </i>
+              <br />
+              <span class="text-muted"
+                >Adel Aly, Olivier Pivert, Virginie Thion — Proceedings of the Research Challenges in Information Science (RCIS'25), Seville, Spain (Best Paper Award)</span
+              >
+            </li>
+            <li>
+              <i>
+                <a href="https://hal.science/hal-04904525v1" target="_blank"
+                  >Maelis4Skrid: an Approximate Query Engine for an Online Graph-Based Musical Score Library</a
+                >
+              </i>
+              <br />
+              <span class="text-muted"
+                >Adel Aly, Olivier Pivert, Virginie Thion — Companion Proceedings of the ACM Web Conference 2025 (WWW'25), Sydney, Australia</span
+              >
+            </li>
+            <li>
+              <i>
+                <a href="https://hal.science/hal-04681804v1" target="_blank"
+                  >Database Approaches to the Modelling and Querying of Musical Scores: a Survey</a
+                >
+              </i>
+              <br />
+              <span class="text-muted"
+                >Adel Aly, Olivier Pivert, Virginie Thion — Proceedings of the International Conference on Theory and Practice of Digital
                 Libraries (TPDL'24)</span
               >
             </li>
             <li>
               <i>
                 <a href="https://www.sciencedirect.com/science/article/pii/S0169023X24000648" target="_blank"
-                  >Topological querying of music scores.</a
+                  >Topological querying of music scores</a
                 >
               </i>
               <br />
-              <span class="text-muted">Philippe Rigaux, Virginie Thion - Data Knowl. Eng. journal. 153: 102340 (2024)</span>
+              <span class="text-muted">Philippe Rigaux, Virginie Thion — Data &amp; Knowledge Engineering, 153: 102340 (2024)</span>
             </li>
             <li>
               <i>
@@ -39,13 +83,13 @@
               </i>
               <br />
               <span class="text-muted"
-                >Philippe Rigaux, Virginie Thion - Revue Ouverte d'Ingénierie des systèmes d'information, 4(2), 2024</span
+                >Philippe Rigaux, Virginie Thion — Revue Ouverte d'Ingénierie des systèmes d'information, 4(2), 2024</span
               >
             </li>
             <li>
-              <i> Towards a Graph-Oriented Perspective for Querying Music Scores (test git)</i>
+              <i>Towards a Graph-Oriented Perspective for Querying Music Scores</i>
               <br />
-              <span class="text-muted">Philippe Rigaux, Virginie Thion - Proceedings of the INFORSID conf.</span>
+              <span class="text-muted">Philippe Rigaux, Virginie Thion — Proceedings of the INFORSID conference (2022)</span>
             </li>
           </ul>
         </div>
