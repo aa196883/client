@@ -61,7 +61,7 @@
               <br />
               <span class="text-muted"
                 >Adel Aly, Olivier Pivert, Virginie Thion — Proceedings of the International Conference on Theory and Practice of Digital
-                Libraries (TPDL'24)</span
+                Libraries (TPDL'24), Ljubljana, Slovenia</span
               >
             </li>
             <li>
@@ -85,11 +85,11 @@
               <span class="text-muted"
                 >Philippe Rigaux, Virginie Thion — Revue Ouverte d'Ingénierie des systèmes d'information, 4(2), 2024</span
               >
-            </li>
+            </li> 
             <li>
               <i>Towards a Graph-Oriented Perspective for Querying Music Scores</i>
               <br />
-              <span class="text-muted">Philippe Rigaux, Virginie Thion — Proceedings of the INFORSID conference (2022)</span>
+              <span class="text-muted">Philippe Rigaux, Virginie Thion — Proceedings of the INFORSID conference (2022), Dijon, France</span>
             </li>
           </ul>
         </div>

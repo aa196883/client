@@ -40,7 +40,7 @@
             <li><strong>Tommaso Padovano</strong> (dev. de l'interface utilisateur et back-end)</li>
             <li><strong>Gwenaël Piel</strong> (encodage des collections J. Mahé)</li>
             <li><strong>Virginie Thion</strong> (génération des formats de données, dev. base de données)</li>
-            <li>
+            <li> 
               <strong>Louis Thomas-Girardey</strong> (poursuite du dev. de l'interface utilisateur, back-end et outils de
               conversions de données)
             </li>
