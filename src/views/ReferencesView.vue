@@ -43,7 +43,7 @@
               >
             </li>
             <li>
-              <i> Towards a Graph-Oriented Perspective for Querying Music Scores </i>
+              <i> Towards a Graph-Oriented Perspective for Querying Music Scores (test git)</i>
               <br />
               <span class="text-muted">Philippe Rigaux, Virginie Thion - Proceedings of the INFORSID conf.</span>
             </li>
