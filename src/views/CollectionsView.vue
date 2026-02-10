@@ -28,12 +28,11 @@
       <div class="archives">
         <p id="archives" class="text-secondary m-4">
           Télécharger la collection sous la forme d'une archive :
-          <a :href="`data/${authors.selectedNameAuthor}/archives/${authors.selectedNameAuthor}_FilesMei.zip`">MEI</a>,
-          <a :href="`data/${authors.selectedNameAuthor}/archives/${authors.selectedNameAuthor}_FilesLy.zip`">LY</a>,
-          <a :href="`data/${authors.selectedNameAuthor}/archives/${authors.selectedNameAuthor}_FilesMid.zip`">MID</a>,
-          <a :href="`data/${authors.selectedNameAuthor}/archives/${authors.selectedNameAuthor}_FilesMusicXML.zip`">MUSICXML</a>,
-          <a :href="`data/${authors.selectedNameAuthor}/archives/${authors.selectedNameAuthor}_FilesPdf.zip`">PDF</a>,
-          <a :href="`data/${authors.selectedNameAuthor}/archives/${authors.selectedNameAuthor}_FilesSvg.zip`">SVG</a>
+          <a :href="`data/${selectedAuthorSlug}/archives/${selectedAuthorSlug}_FilesMei.zip`">MEI</a>,
+          <a :href="`data/${selectedAuthorSlug}/archives/${selectedAuthorSlug}_FilesMid.zip`">MID</a>,
+          <a :href="`data/${selectedAuthorSlug}/archives/${selectedAuthorSlug}_FilesMusicXML.zip`">MUSICXML</a>,
+          <a :href="`data/${selectedAuthorSlug}/archives/${selectedAuthorSlug}_FilesPdf.zip`">PDF</a>,
+          <a :href="`data/${selectedAuthorSlug}/archives/${selectedAuthorSlug}_FilesSvg.zip`">SVG</a>
         </p>
         <paginated-results :data="collectionScoresMetadata" :loading="isLoading" />
       </div>
@@ -45,7 +44,7 @@
 import PaginatedResults from '@/components/common/PaginatedResults.vue';
 import { fetchCollectionScoresNamesByAuthor } from '@/services/dataBaseQueryServices';
 import { useAuthorsStore } from '@/stores/authorsStore';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 defineOptions({
   name: 'CollectionsView',
@@ -54,6 +53,7 @@ defineOptions({
 const isLoading = ref(true);
 const authors = useAuthorsStore();
 const collectionScoresMetadata = ref([]);
+const selectedAuthorSlug = computed(() => authors.selectedAuthorName.replace(/ /g, '-'));
 
 onMounted(() => {
   authors.loadAuthors().then(() => {
