@@ -26,7 +26,7 @@
             <div class="score-footer">
               <h6 v-if="scoreData.author" class="score-author">{{ scoreData.author }}</h6>
               <p v-if="scoreData.comment" class="score-comment">
-                <span class="comment">Commentaire:</span> <br />{{ scoreData.comment }}
+                <span class="comment">Informations complémentaires :</span> <br />{{ scoreData.comment }}
               </p>
             </div>
           </div>

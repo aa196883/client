@@ -21,31 +21,8 @@
         <hr />
         <br />
         <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title text-center">Recueil Albert Poulain</h5>
-                <p class="card-text text-muted">
-                  Ces partitions sont issues de l'ouvrage
-                  <a href="https://pur-editions.fr/product/668/carnets-de-route" target="_blank">
-                    <i>Albert Poulain, Carnets de route, chansons traditionnelles de Haute Bretagne</i>
-                  </a>
-                  (Éditions Dastum, Presses universitaires de Rennes), publié en 2011. Fichiers d'encodage. <br /><br />
-                  Dastum (Anne-Marie Nicol) a fourni chacune des partitions disponibles au format d'un fichier Finale.
-                  <br /><br />
-                  Le projet Skrid a exporté les partitions sous forme MusicXML (via la fonctionnalité d'export de Finale). Les
-                  partitions ont ensuite été exportée aux formats
-                  <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>
-                  , PDF, MIDI, SVG via MuseScore. Le format
-                  <a href="https://music-encoding.org/" target="_blank">MEI</a>
-                  a été obtenu par transcription du fichier musicXML via l'outil
-                  <a href="https://www.verovio.org" target="_blank">verovio</a>.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card">
+          <div class="col-12">
+            <div class="card card-highlight">
               <div class="card-body">
                 <h5 class="card-title text-center">Avant-propos important</h5>
                 <p class="card-text text-muted">
@@ -62,7 +39,53 @@
               </div>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title text-center">Recueil Albert Poulain</h5>
+                <p class="card-text text-muted">
+                  Ces partitions sont issues de l'ouvrage
+                  <a href="https://pur-editions.fr/product/668/carnets-de-route" target="_blank">
+                    <i>Albert Poulain, Carnets de route, chansons traditionnelles de Haute Bretagne</i>
+                  </a>
+                  (Éditions Dastum, Presses universitaires de Rennes), publié en 2011. <br /><br />
+                  Dastum (<b>Anne-Marie Nicol</b>) a fourni chacune des partitions disponibles au format d'un fichier Finale.
+                  <br /><br />
+                  Le projet Skrid a exporté les partitions sous forme MusicXML (via la fonctionnalité d'export de Finale). Les
+                  partitions ont ensuite été exportée aux formats
+                  <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>
+                  , PDF, MIDI, SVG via MuseScore. Le format
+                  <a href="https://music-encoding.org/" target="_blank">MEI</a>
+                  a été obtenu par transcription du fichier musicXML via l'outil
+                  <a href="https://www.verovio.org" target="_blank">verovio</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title text-center">Recueil François Cadic</h5>
+                <p class="card-text text-muted">
+                  Ces partitions sont issues de l'ouvrage
+                  <a href="https://www.dastum.bzh/article/chansons-populaires-de-bretagne-1899-1929-francois-cadic/" target="_blank">
+                    <i>Chansons populaires de Bretagne (1899-1929) - François Cadic</i>
+                  </a>
+                  (Éditions Dastum, Presses universitaires de Rennes), publié en 2010. <br /><br />
+                  Chacun de fichiers encodé a été fourni par le site kan.bzh (<b>Didier Becam</b> et <b>Nolwenn Morvan</b>) au format d'un fichier Finale.
+                  <br /><br />
+                  Le projet Skrid a exporté les partitions sous forme MusicXML (via la fonctionnalité d'export de Finale). Les
+                  partitions ont ensuite été exportée aux formats
+                  <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>
+                  , PDF, MIDI, SVG via MuseScore. Le format
+                  <a href="https://music-encoding.org/" target="_blank">MEI</a>
+                  a été obtenu par transcription du fichier musicXML via l'outil
+                  <a href="https://www.verovio.org" target="_blank">verovio</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title text-center">Recueil Joseph Mahé</h5>
@@ -76,17 +99,17 @@
                   de la BnF. <br /><br />
                   Ces œuvres sont également étudiées dans l'ouvrage Joseph Mahé (1760-1831) Premier collecteur de musique
                   populaire de Haute et Basse-Bretagne de Roland Becker (Éditions Dastum, Presses universitaires de Rennes),
-                  publié en 2017. Fichiers d'encodage. Pour chacune des partitions, la partition a été saisie sous
+                  publié en 2017. <br/><br/>
+
+                  Pour chacune des partitions, la partition a été saisie sous
                   <a href="https://www.musescore.com" target="_blank"> MuseScore </a>
-                  (.mscz) par Gwenael Piel, et ensuite exportée aux formats
+                  (.mscz) par <b>Gwenael Piel</b>, et ensuite exportée aux formats
                   <a href="https://w3c.github.io/musicxml/" target="_blank"> musicXML </a>
                   , PDF, MIDI, SVG via MuseScore. <br /><br />
                   Le format
                   <a href="https://music-encoding.org/" target="_blank"> MEI </a>
                   a été obtenu par transcription du fichier musicXML via l'outil
                   <a href="https://www.verovio.org" target="_blank"> verovio. </a>
-                  Collections associées dans Skrid: Collection dite "Joseph Mahé Original" contenant les partitions originales
-                  Collection dite "Joseph Mahé Transposed" contenant les partitions transposées dans la tonalité Sol Majeur.
                 </p>
               </div>
             </div>
@@ -116,6 +139,12 @@ defineOptions({
   border: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+}
+
+.services .card-highlight {
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(0, 100, 150, 0.2);
+  background: rgba(122, 182, 224, 0.08);
 }
 
 .services .card:hover {
