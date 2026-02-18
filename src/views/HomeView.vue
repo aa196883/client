@@ -13,10 +13,10 @@
       <div class="container">
         <p class="text-center text-muted mb-5">
           La plateforme Skrid est développée et maintenue par le laboratoire IRISA (site de Lannion). Cette plateforme est un
-          prototype d&eacute;di&eacute; &agrave; la mise en oeuvre de techniques de recherche de contenu musical
-          (d&eacute;velopp&eacute;es par l'IRISA) au sein de partitions musicales de musique traditionnelle bretonne. <br />
-          À ce jour, deux collections sont int&eacute;gr&eacute;es &agrave; la plateforme Skrid. Une troisième collection est en
-          cours de numérisation.
+          prototype d&eacute;di&eacute; &agrave; la mise en oeuvre de techniques de recherche de motifs dans les bases de données graphe (d&eacute;velopp&eacute;es par l'IRISA), en l'occurrence ici de recherche de motifs musicaux
+          au sein de partitions musicales de musique traditionnelle bretonne. <br />
+          À ce jour, quelques collections sont int&eacute;gr&eacute;es &agrave; la plateforme Skrid (voir texte ci-dessous), et d'autres collections sont en 
+          cours de numérisation. Les collections peuvent être consultées via l'onglet "Collections" du menu de navigation. Des motifs musicaux peuvent être recherchés dans ces collections, via l'onglet "Recherche" du menu de navigation.<br />
         </p>
         <hr />
         <br />
@@ -26,15 +26,18 @@
               <div class="card-body">
                 <h5 class="card-title text-center">Avant-propos important</h5>
                 <p class="card-text text-muted">
-                  L'objectif de la plateforme est la mise à disposition de partitions sous une forme numérisée permettant la
+<!--                   L'objectif de la plateforme est la mise à disposition de partitions sous une forme numérisée permettant la
                   recherche dans le contenu des partitions et non leur édition. <br /><br />
-                  Le processus de conversion utilisé dans la plateforme, permettant de passer de la version originale de la
-                  partition à une version de la partition encodant son contenu musical de façon fine, peut conduire à la perte de
-                  quelques partitions d'une collection, à l'introduction de quelques erreurs et surtout à la perte de la mise en
-                  page des partitions. <br /><br />
-                  Les fournisseurs des données que la plateforme remercie grandement pour leur aide, ne sont aucunement
-                  responsables des erreurs que le traitement des données pourrait occasionner sur les partitions mises à
-                  disposition par la plateforme.
+ -->                  Le processus automatique de conversion utilisé dans la plateforme, permettant de passer de la version originale de la
+                  partition à une version de la partition encodant son contenu musical de façon fine (pour permettre une recherche automatisée dans les partitions), peut conduire à la perte de
+                  quelques partitions d'une collection, à l'introduction de quelques erreurs et entraîne la perte de la mise en
+                  page des partitions. 
+                  Les fournisseurs des données, que la plateforme remercie grandement pour leur implication dans ce projet, ne sont aucunement
+                  responsables des erreurs que le traitement automatisé des données pourrait occasionner sur les partitions mises à
+                  disposition.<br/><br/>
+                  Les données accessibles et mises à disposition sur la plateforme n'appartiennent pas à l'IRISA (Université de Rennes).
+                  Si vous souhaitez exploiter commercialement ces données, nous vous invitons à contacter le propriétaire de ces données. 
+                  L'IRISA/Université de Rennes se décharge de toute responsabilité quant à l'utilisation des données disponibles sur la Plateforme.
                 </p>
               </div>
             </div>
@@ -51,13 +54,11 @@
                   (Éditions Dastum, Presses universitaires de Rennes), publié en 2011. <br /><br />
                   Dastum (<b>Anne-Marie Nicol</b>) a fourni chacune des partitions disponibles au format d'un fichier Finale.
                   <br /><br />
-                  Le projet Skrid a exporté les partitions sous forme MusicXML (via la fonctionnalité d'export de Finale). Les
-                  partitions ont ensuite été exportée aux formats
-                  <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>
-                  , PDF, MIDI, SVG via MuseScore. Le format
+                  Le projet Skrid a exporté les partitions au format <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>, via la fonctionnalité d'export de Finale. Les
+                  partitions ont ensuite été exportées aux formats PDF, MIDI, SVG via MuseScore. Enfin, le format
                   <a href="https://music-encoding.org/" target="_blank">MEI</a>
-                  a été obtenu par transcription du fichier musicXML via l'outil
-                  <a href="https://www.verovio.org" target="_blank">verovio</a>.
+                  a été obtenu par transcription du fichier musicXML, via l'outil
+                  <a href="https://www.verovio.org" target="_blank">verovio</a>. La plateforme Skrid exploite essentiellement le format MEI. 
                 </p>
               </div>
             </div>
@@ -74,13 +75,11 @@
                   (Éditions Dastum, Presses universitaires de Rennes), publié en 2010. <br /><br />
                   Chacun de fichiers encodé a été fourni par le site kan.bzh (<b>Didier Becam</b> et <b>Nolwenn Morvan</b>) au format d'un fichier Finale.
                   <br /><br />
-                  Le projet Skrid a exporté les partitions sous forme MusicXML (via la fonctionnalité d'export de Finale). Les
+                  Le projet Skrid a exporté les partitions au format <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>, via la fonctionnalité d'export de Finale. Les
                   partitions ont ensuite été exportée aux formats
-                  <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>
-                  , PDF, MIDI, SVG via MuseScore. Le format
-                  <a href="https://music-encoding.org/" target="_blank">MEI</a>
-                  a été obtenu par transcription du fichier musicXML via l'outil
-                  <a href="https://www.verovio.org" target="_blank">verovio</a>.
+                  <a href="https://w3c.github.io/musicxml/" target="_blank">musicXML</a>, PDF, MIDI, SVG via MuseScore. Enfin, le format
+                  <a href="https://music-encoding.org/" target="_blank">MEI</a> a été obtenu par transcription du fichier musicXML, via l'outil
+                  <a href="https://www.verovio.org" target="_blank">verovio</a>. La plateforme skrid exploite essentiellement le format MEI. 
                 </p>
               </div>
             </div>
@@ -90,26 +89,25 @@
               <div class="card-body">
                 <h5 class="card-title text-center">Recueil Joseph Mahé</h5>
                 <p class="card-text text-muted">
-                  Origine des partitions. Ces partitions sont issues du manuscrit
+                  Ces partitions sont issues du manuscrit
                   <a href="https://gallica.bnf.fr/ark:/12148/bpt6k61026071" target="_blank">
                     <i>Essai sur les Antiquit&eacute;s du d&eacute;partement du Morbihan</i>
                   </a>
                   , de Joseph Mahé, publié en 1825, dont une version numérique est mise à disposition dans la Biliothèque
                   <a href="https://gallica.bnf.fr/" target="_blank"> Gallica </a>
-                  de la BnF. <br /><br />
-                  Ces œuvres sont également étudiées dans l'ouvrage Joseph Mahé (1760-1831) Premier collecteur de musique
-                  populaire de Haute et Basse-Bretagne de Roland Becker (Éditions Dastum, Presses universitaires de Rennes),
+                  de la BnF. 
+                  Ces œuvres sont également étudiées dans l'ouvrage <a href="https://pur-editions.fr/product/6746/joseph-mahe-1760-1831" target="_blank">Joseph Mahé (1760-1831) Premier collecteur de musique
+                  populaire de Haute et Basse-Bretagne</a> de Roland Becker (Éditions Dastum, Presses universitaires de Rennes),
                   publié en 2017. <br/><br/>
 
                   Pour chacune des partitions, la partition a été saisie sous
-                  <a href="https://www.musescore.com" target="_blank"> MuseScore </a>
+                  <a href="https://www.musescore.com" target="_blank"> MuseScore</a> 
                   (.mscz) par <b>Gwenael Piel</b>, et ensuite exportée aux formats
-                  <a href="https://w3c.github.io/musicxml/" target="_blank"> musicXML </a>
-                  , PDF, MIDI, SVG via MuseScore. <br /><br />
+                  <a href="https://w3c.github.io/musicxml/" target="_blank"> musicXML</a>, PDF, MIDI, SVG via MuseScore. 
                   Le format
-                  <a href="https://music-encoding.org/" target="_blank"> MEI </a>
+                  <a href="https://music-encoding.org/" target="_blank"> MEI</a> 
                   a été obtenu par transcription du fichier musicXML via l'outil
-                  <a href="https://www.verovio.org" target="_blank"> verovio. </a>
+                  <a href="https://www.verovio.org" target="_blank"> verovio</a>. La plateforme Skrid exploite essentiellement le format MEI. 
                 </p>
               </div>
             </div>
