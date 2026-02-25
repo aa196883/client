@@ -5,7 +5,7 @@ import { fetchAuthors } from '@/services/dataBaseQueryServices.ts';
 export const useAuthorsStore = defineStore('authors', {
   state: () => {
     return {
-      listeAuthors: <string[]>['chargement'],
+      listeAuthors: <string[]>['Chargement'],
       selectedAuthorIndex: 0, // Index of the selected author
       loaded: false, // Indicates if the authors have been loaded
     }; // Initialize with a default value (print "chargement" while fetching data)

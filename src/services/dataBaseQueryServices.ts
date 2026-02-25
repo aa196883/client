@@ -64,3 +64,23 @@ export async function fetchSearchResults(searchParams: SearchParams) {
     throw error;
   }
 }
+/**
+ * Fetches stats based on the provided data.
+ *
+ * @param {source} string the score source to be sent in the request body.
+ * @param {voice_nb} string the voice number to be sent in the request body.
+ * @returns {Promise<Object>} A promise that resolves to the query results.
+ */
+export async function fetchStatResults(source: string, voice_nb: number) {
+  try {
+    const response = await api.post('/score-stats', { 
+      source: source, 
+      voice_nb: voice_nb 
+    });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching /score-stats', error);
+    throw error;
+  }
+}
