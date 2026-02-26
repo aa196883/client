@@ -20,7 +20,7 @@
             <router-link class="nav-link text-white" to="/collections">Collections</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link text-white" to="/searchinterface">Recherche</router-link>
+            <router-link class="nav-link text-white" to="/searchinterface">Recherche par motif</router-link>
           </li>
         </ul>
       </div>
