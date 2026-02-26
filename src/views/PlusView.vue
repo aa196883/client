@@ -34,16 +34,19 @@
             <li><strong>Adel Aly</strong> (poursuite du dev. de l'interface utilisateur et back-end)</li>
             <li><strong>Pierre Alain</strong> (mise en œuvre de l'architecture)</li>
             <li><strong>Vincent Barreaud</strong> (dev. de l'interface utilisateur et back-end)</li>
-            <li><strong>Jules Gobillot</strong> (poursuite du dev. de l'interface utilisateur)</li>
-            <li><strong>Anne-Marie Nicol</strong> (amorce projet, références collections et contacts musique traditionnelle)</li>
-            <li><strong>Tommaso Padovano</strong> (dev. de l'interface utilisateur et back-end)</li>
+            <li><strong>Alexandre Baudoin</strong> (stage, dev. de l'interface utilisateur et back-end)</li>
+            <li><strong>Laurent Garnier</strong> (déploiement)</li>
+            <li><strong>Jules Gobillot</strong> (stage, poursuite du dev. de l'interface utilisateur)</li>
+            <li><strong>Anne-Marie Nicol </strong> (amorce projet, références collections et contacts musique traditionnelle)</li>
+            <li><strong>Tommaso Padovano</strong> (stage, dev. de l'interface utilisateur et back-end)</li>
             <li><strong>Gwenaël Piel</strong> (encodage des collections J. Mahé)</li>
             <li><strong>Virginie Thion</strong> (génération des formats de données, dev. base de données)</li>
-            <li>
-              <strong>Louis Thomas-Girardey</strong> (poursuite du dev. de l'interface utilisateur, back-end et outils de
+            <li> 
+              <strong>Louis Thomas-Girardey</strong> (stage, poursuite du dev. de l'interface utilisateur, back-end et outils de
               conversions de données)
             </li>
-            <li><strong>Clément Van Straaten</strong> (outils de conversion de données)</li>
+            <li><strong>Clément Van Straaten</strong> (stage, outils de conversion de données)</li>
+            <li><strong>Auriane Zakei</strong> (stage, premier module de statistiques)</li>
           </ul>
           <hr />
           <p class="text-center">

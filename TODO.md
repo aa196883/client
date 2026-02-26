@@ -11,6 +11,8 @@
 
 - Result popup: when the popup appears, it goes to the top of the behind page (this is because it set `overflow: hidden`), which is a problem when closing the popup: the user has to scroll down again to see the other results ;
 - Paginated results: fix the csv button (get the code from the old frontend)
+- collection choice is bound to collection page
+- responsive nav not working
 
 ## New features
 - query-by-humming/by-instrument

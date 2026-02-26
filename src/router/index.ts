@@ -35,7 +35,7 @@ const router = createRouter({
       path: '/searchInterface',
       name: 'searchInterface',
       component: SearchInterfaceView,
-    },
+    }
     // If you add a page here, do not forget to also add the route into the `const urls` of `frontend.git/index.js` to be able to get the page.
   ],
   scrollBehavior(to, from, savedPosition) {

@@ -131,8 +131,13 @@ export function extractAuthorFromMeiXML(meiXML: string): string {
 }
 
 export function extractCommentFromMeiXML(meiXML: string): string {
-  // Try to extract the comment from the <pgHead> tag
+  // Try to extract the comment from the <pgFoot> tag
   return (
+    meiXML
+      .match(/<pgFoot.*?<\/pgFoot>/s)?.[0]
+      ?.match(/<rend.*?<\/rend>/gs)?.[1]
+      ?.match(/>.*?</s)?.[0]
+      .slice?.(1, -1) ?? // if no pgFoot found, try to get comment from <pgHead> tag
     meiXML
       .match(/<pgHead.*?<\/pgHead>/s)?.[0]
       ?.match(/<rend.*?<\/rend>/gs)?.[2]
