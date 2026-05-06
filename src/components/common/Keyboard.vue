@@ -241,7 +241,7 @@
 import Player from '@/lib/player.js';
 import StaveRepresentation from '@/lib/stave.js';
 import { durationNote, mapping_azerty, qwerty_us_to_azerty } from '@/constants/index.ts';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 defineOptions({
   name: 'Keyboard',
@@ -258,6 +258,8 @@ watch(volume, (newVolume) => {
 });
 
 const currently_played_notes = {}; // Object to keep track of currently played notes
+
+const removePianoMouseListeners = [];
 
 let isAzertyMapping = true; // Default keyboard mapping = azerty
 /**
@@ -426,12 +428,13 @@ onMounted(() => {
   const pianoKeys = document.querySelectorAll('.piano-keys .key');
   // Adding mouseDown, mouseUp listeners to each piano key
   pianoKeys.forEach((key) => {
-    key.addEventListener('mousedown', () => {
+    const onMouseDown = () => {
       const oct = parseInt(key.dataset.key.at(-1)) - 4;
       const key_ = key.dataset.key.slice(0, -1) + (oct + octave.value);
       keyDown(key_, key.dataset.key);
-    });
-    key.addEventListener('mouseup', () => {
+    };
+
+    const onMouseUp = () => {
       // Make the note with the '/'
       let newkey;
 
@@ -442,6 +445,14 @@ onMounted(() => {
       newkey = newkey.slice(0, -1) + (oct + octave.value);
 
       keyUp(newkey, key.dataset.key);
+    };
+
+    key.addEventListener('mousedown', onMouseDown);
+    key.addEventListener('mouseup', onMouseUp);
+
+    removePianoMouseListeners.push(() => {
+      key.removeEventListener('mousedown', onMouseDown);
+      key.removeEventListener('mouseup', onMouseUp);
     });
   });
 
@@ -449,6 +460,13 @@ onMounted(() => {
   // and the silence button
   document.addEventListener('keydown', keyListener);
   document.addEventListener('keyup', keyListener);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', keyListener);
+  document.removeEventListener('keyup', keyListener);
+  removePianoMouseListeners.forEach((cleanup) => cleanup());
+  removePianoMouseListeners.length = 0;
 });
 </script>
 
