@@ -4,6 +4,7 @@ export type Note = {
   pitch_deg: number;
   duration_deg: number;
   sequencing_deg: number;
+  membership_functions_degrees?: Record<string, number>;
   id: string;
 };
 

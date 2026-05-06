@@ -244,6 +244,9 @@
         <p>Satisfaction en hauteur : {{ hoveredNote.pitch_deg }}%</p>
         <p>Satisfaction en durée : {{ hoveredNote.duration_deg }}%</p>
         <p>Satisfaction de l'enchaînement : {{ hoveredNote.sequencing_deg }}%</p>
+        <p v-for="membershipFunction in hoveredNote.membershipFunctionDegrees" :key="membershipFunction.name">
+          {{ membershipFunction.name }}: {{ membershipFunction.degree }}%
+        </p>
       </div>
     </div>
   </div>
@@ -308,6 +311,19 @@ const svgContainer = ref<HTMLElement | null>(null);
 const isNoteInfoShown = ref(false);
 const tooltipDiv = ref<HTMLElement | null>(null);
 const hoveredNote = ref<any>({});
+
+const formatDegreeAsPercentage = (degree: number): number => Math.floor(degree * 100);
+
+const getMembershipFunctionDegrees = (note: Note): { name: string; degree: number }[] => {
+  if (!note.membership_functions_degrees) return [];
+
+  return Object.entries(note.membership_functions_degrees)
+    .filter(([, degree]) => typeof degree === 'number' && Number.isFinite(degree))
+    .map(([name, degree]) => ({
+      name,
+      degree: formatDegreeAsPercentage(degree),
+    }));
+};
 
 // --- Computed Properties ---
 const matches = computed(() => extractScoreMatches(props.scoreData));
@@ -425,13 +441,13 @@ const initNoteHoverInfo = () => {
 const showNoteInfo = async (event: MouseEvent, match: Match, index: number, note: Note) => {
   const isSelected = selectedMatchIndices.value.some(m => m.index === index);
   if (!isSelected) return;
-
   hoveredNote.value = {
     id: index + 1,
-    note_deg: Math.floor(note.note_deg * 100),
-    pitch_deg: Math.floor(note.pitch_deg * 100),
-    duration_deg: Math.floor(note.duration_deg * 100),
-    sequencing_deg: Math.floor(note.sequencing_deg * 100),
+    note_deg: formatDegreeAsPercentage(note.note_deg),
+    pitch_deg: formatDegreeAsPercentage(note.pitch_deg),
+    duration_deg: formatDegreeAsPercentage(note.duration_deg),
+    sequencing_deg: formatDegreeAsPercentage(note.sequencing_deg),
+    membershipFunctionDegrees: getMembershipFunctionDegrees(note),
   };
   isNoteInfoShown.value = true;
   await nextTick();

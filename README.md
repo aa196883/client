@@ -15,6 +15,7 @@ The **frontend** (connecting the client and the backend) is maintained in a sepa
 - Interface for melodic and rhythmic search via interactive piano interface input
 - Flexible contour search
 - Display of musical score collection
+- Score result details with note hover tooltips, including optional membership function degrees when provided by the API
 - Communication with a Python backend via REST endpoints (through the frontend server)
 
 ---

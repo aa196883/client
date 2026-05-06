@@ -100,6 +100,10 @@
             </div>
             <hr />
             <p>Si vous cliquez sur un mode, la recherche se lance directement.</p>
+            <p>
+              Dans le détail d'une partition, survoler une note d'un résultat affiche ses satisfactions. Lorsque le backend fournit
+              des degrés de fonctions d'appartenance, ils sont listés dans cette infobulle avec leur pourcentage.
+            </p>
             <hr />
             <br />
             <div class="card mx-auto" style="width: 50rem; border: none">

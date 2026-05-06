@@ -1,6 +1,6 @@
 export interface SearchParams {
   collection: string; // name of the collection to search in
-  notes: string | string[];
+  notes: string | string[] | Record<string, string>;
   allow_transposition: boolean | boolean[];
   allow_homothety: boolean | boolean[];
   incipit_only: boolean;
