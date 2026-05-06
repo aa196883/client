@@ -3,7 +3,7 @@
     <!-- choose the collection in which to search -->
     <div class="collections-options">
       <!-- <label for="collections">Collection dans lesquelle rechercher : </label><br /> -->
-      <label for="collections">Collection (demo EDBT) : </label><br />
+      <label for="collections">Collections : </label><br />
       <select id="collections" name="collections" v-model="selectedAuthorName">
         <option
           v-for="(author, index) in authors.listeAuthors"
