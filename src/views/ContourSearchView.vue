@@ -24,7 +24,7 @@
       </div>
 
       <div class="field">
-        <label for="collections">Collection (demo EDBT)</label>
+        <label for="collections">Collections</label>
         <select id="collections" name="collections" v-model="selectedAuthorName">
           <option
             v-for="(author, index) in authors.listeAuthors"
