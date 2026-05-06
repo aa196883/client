@@ -84,10 +84,8 @@ async function runContourSearch() {
 
   try {
     searchResults.value = await fetchSearchResults({
-      notes: {
-        melodic_contour: melodicContour.value.trim(),
-        rhythmic_contour: rhythmicContour.value.trim(),
-      },
+      // NOTES must be a string containing a rhythmic sequence ('L', 'M', 'l', 'S', 's', 'X') and a melodic contour sequence ('*U', 'U', 'u', 'R', 'd', 'D', '*D', 'X'), separated by '-'. Example: 'URdU*-LMl'."
+      notes: `${melodicContour.value.trim()}-${rhythmicContour.value.trim()}`,
       contour_match: true,
       collection: authors.selectedAuthorName,
       incipit_only: false,
