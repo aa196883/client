@@ -23,7 +23,7 @@
             <router-link class="nav-link text-white" to="/searchinterface">Recherche par motif</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link text-white" to="/contour-search">Recherche par contour</router-link>
+            <router-link class="nav-link text-white" to="/contourinterface">Recherche par contour</router-link>
           </li>
         </ul>
       </div>
